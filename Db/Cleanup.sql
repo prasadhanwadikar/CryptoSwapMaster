@@ -1,0 +1,3 @@
+﻿TRUNCATE TABLE SelectedAssets
+DELETE FROM Users
+DBCC CHECKIDENT ('Users', RESEED, 0)
