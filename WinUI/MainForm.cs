@@ -33,14 +33,14 @@ namespace UI
         public MainForm()
         {
             InitializeComponent();
-            
+
             _bgwRefreshQuotes = new BackgroundWorker {WorkerSupportsCancellation = true};
             _bgwRefreshQuotes.DoWork += RefreshQuotes;
             _bgwRefreshQuotes.RunWorkerCompleted += RefreshQuotesCompleted;
 
             _timer = new System.Windows.Forms.Timer
             {
-                Interval = 15000
+                Interval = 10000
             };
             _timer.Tick += TimerOnElapsed;
 
@@ -289,10 +289,13 @@ namespace UI
             {
                 if (e.Error != null)
                 {
-                    _timer.Stop();
-                    var err = e.Error.GetType() == typeof(BinanceException) ? ((BinanceException)e.Error).Msg : e.Error.Message;
-                    MessageBox.Show(err, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    if (e.Error.GetType() == typeof(BinanceException))
+                    {
+                        if (_timer.Enabled) _timer.Stop();
+                        HandleBinanceException((BinanceException)e.Error);
+                        return;
+                    }
+                    throw e.Error;
                 }
 
                 if (clbQuoteAssets.Items.Count != _allAssets.Count)
@@ -318,23 +321,15 @@ namespace UI
             {
                 try
                 {
-                    _binance = new BinanceApiClient(txtApiKey.Text.Trim(), txtSecretKey.Text.Trim());
+                    _binance.ResetApiKeys(txtApiKey.Text.Trim(), txtSecretKey.Text.Trim());
                     _exchangeInfo = _binance.GetExchangeInfo();
                     _accountInfo = _binance.GetAccountInfo();
                     _allAssets = _accountInfo.Balances.Select(x => x.Asset).ToList();
                 }
                 catch (BinanceException bex)
                 {
-                    var err = bex.Msg;
-                    if (bex.Code == -2014)
-                    {
-                        err = "Invalid Api Key";
-                    }
-                    else if (bex.Code == -1022)
-                    {
-                        err = "Invalid Secret Key";
-                    }
-                    MessageBox.Show(err, "Error connecting with Binance account", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    if (_timer.Enabled) _timer.Stop();
+                    HandleBinanceException(bex);
                     return;
                 }
 
@@ -349,13 +344,14 @@ namespace UI
                     MessageBox.Show("Quotes on the Dashboard are shown for the selected assets on this tab", "Note", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
-                var selectedAssets = new List<string>();
+                var quoteAssets = new List<string>();
                 foreach (var item in clbQuoteAssets.CheckedItems)
                 {
-                    selectedAssets.Add(item.ToString());
+                    quoteAssets.Add(item.ToString());
                 }
 
-                _user = _db.SaveUser(lblIPValue.Text, txtApiKey.Text.Trim(), txtSecretKey.Text.Trim(), selectedAssets);
+                _user = _db.SaveUser(lblIPValue.Text, txtApiKey.Text.Trim(), txtSecretKey.Text.Trim(), quoteAssets);
+
                 LoadDashboard();
             }
             catch (Exception ex)
@@ -386,6 +382,30 @@ namespace UI
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void HandleBinanceException(BinanceException bex)
+        {
+            var err = bex.Msg;
+            if (bex.Code == -2014)
+            {
+                err = "Invalid Api Key";
+            }
+            else if (bex.Code == -1022)
+            {
+                err = "Invalid Secret Key";
+            }
+            MessageBox.Show(err, "Binance Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void start_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void stop_Click(object sender, EventArgs e)
+        {
+            
         }
     }
 }

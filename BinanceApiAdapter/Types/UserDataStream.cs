@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace BinanceApiAdapter.Types
 {
-    public class ServerTime
+    public class UserDataStream
     {
-        [JsonProperty("serverTime")]
-        public long Time { get; set; }
+        public string ListenKey { get; set; }
     }
 }

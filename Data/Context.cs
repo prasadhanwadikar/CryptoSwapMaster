@@ -15,7 +15,12 @@ namespace Data
             Database.SetInitializer<Context>(null);
         }
 
-        public DbSet<QuoteAsset> QuoteAssets { get; set; }
         public DbSet<User> Users { get; set; }
+
+        public DbSet<QuoteAsset> QuoteAssets { get; set; }
+
+        public DbSet<Order> Orders { get; set; }
+
+        public DbSet<ExchangeOrder> ExchangeOrders { get; set; }
     }
 }

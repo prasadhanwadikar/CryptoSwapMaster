@@ -1,35 +1,21 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using RestSharp.Deserializers;
-using RestSharp.Serializers;
 
 namespace BinanceApiAdapter
 {
-    public class NewtonsoftJsonSerializer : ISerializer, IDeserializer
+    public class JsonSerializer
     {
         private readonly Newtonsoft.Json.JsonSerializer _serializer;
 
-        public NewtonsoftJsonSerializer()
+        public JsonSerializer()
         {
             _serializer = new Newtonsoft.Json.JsonSerializer();
         }
-
-        public string ContentType
-        {
-            get => "application/json";
-            set { }
-        }
-
-        public string DateFormat { get; set; }
-
-        public string Namespace { get; set; }
-
-        public string RootElement { get; set; }
 
         public string Serialize(object obj)
         {
@@ -38,16 +24,13 @@ namespace BinanceApiAdapter
                 using (var jsonTextWriter = new JsonTextWriter(stringWriter))
                 {
                     _serializer.Serialize(jsonTextWriter, obj);
-
                     return stringWriter.ToString();
                 }
             }
         }
 
-        public T Deserialize<T>(RestSharp.IRestResponse response)
+        public T Deserialize<T>(string content)
         {
-            var content = response.Content;
-
             using (var stringReader = new StringReader(content))
             {
                 using (var jsonTextReader = new JsonTextReader(stringReader))

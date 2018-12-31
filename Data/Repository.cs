@@ -25,7 +25,7 @@ namespace Data
             }
         }
 
-        public User SaveUser(string ip, string apiKey, string secretKey, List<string> selectedAssets)
+        public User SaveUser(string ip, string apiKey, string secretKey, List<string> quoteAssets)
         {
             using (var context = new Context())
             {
@@ -58,7 +58,7 @@ namespace Data
 
                 var existingSelectedAssets = context.QuoteAssets.Where(x => x.UserId == user.Id);
                 if (existingSelectedAssets.Any()) context.QuoteAssets.RemoveRange(existingSelectedAssets);
-                foreach (var asset in selectedAssets)
+                foreach (var asset in quoteAssets)
                 {
                     context.QuoteAssets.Add(new QuoteAsset()
                                                     {
