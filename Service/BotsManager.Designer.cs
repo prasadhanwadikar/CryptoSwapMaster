@@ -1,6 +1,6 @@
 ﻿namespace BinanceService
 {
-    partial class OrderExecutor
+    partial class BotsManager
     {
         /// <summary> 
         /// Required designer variable.
@@ -28,8 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            this.ServiceName = "Service1";
+            // 
+            // BotsManager
+            // 
+            this.ServiceName = "CryptoSwapMaster.BotsManager";
+
         }
 
         #endregion

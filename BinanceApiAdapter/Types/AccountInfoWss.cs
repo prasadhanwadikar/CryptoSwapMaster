@@ -40,11 +40,11 @@ namespace BinanceApiAdapter.Types
         public long UpdateTime { get; set; }
 
         [JsonProperty("B")]
-        public List<Balance> Balances { get; set; }
+        public List<BalanceWss> Balances { get; set; }
 
         public AccountInfoWss()
         {
-            Balances = new List<Balance>();
+            Balances = new List<BalanceWss>();
         }
     }
 }

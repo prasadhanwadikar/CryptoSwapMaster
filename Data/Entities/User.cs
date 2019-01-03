@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Data.Entities
@@ -22,5 +23,10 @@ namespace Data.Entities
 
         [Required]
         public string SecretKey { get; set; }
+
+        [Required]
+        public BotStatus BotStatus { get; set; }
+
+        public string BotStatusMsg { get; set; }
     }
 }

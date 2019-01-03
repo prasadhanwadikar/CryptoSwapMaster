@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Migrations.Sql;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,25 @@ namespace Data
             }
         }
 
+        public List<User> GetUsers()
+        {
+            using (var context = new Context())
+            {
+                return context.Users.ToList();
+            }
+        }
+
+        public void UpdateBotStatus(int userId, BotStatus botStatus, string message = null)
+        {
+            using (var context = new Context())
+            {
+                var user = context.Users.Find(userId);
+                user.BotStatus = botStatus;
+                user.BotStatusMsg = message;
+                context.SaveChanges();
+            }
+        }
+
         public User SaveUser(string ip, string apiKey, string secretKey, List<string> quoteAssets)
         {
             using (var context = new Context())
@@ -39,7 +59,8 @@ namespace Data
                         {
                             Ip = ip,
                             ApiKey = apiKey,
-                            SecretKey = secretKey
+                            SecretKey = secretKey,
+                            BotStatus = BotStatus.Stopped
                         };
                         context.Users.Add(user);
                     }

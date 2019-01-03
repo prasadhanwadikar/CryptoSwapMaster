@@ -110,7 +110,7 @@ namespace BinanceApiAdapter
             return ProcessRequest<AccountInfo>(request, SecurityType.USER_DATA);
         }
 
-        public void GetAccountInfoWss()
+        private void GetAccountInfoWss()
         {
             try
             {
@@ -126,7 +126,17 @@ namespace BinanceApiAdapter
                     var accountInfoWss = jsonSerializer.Deserialize<AccountInfoWss>(e.Data);
                     if (accountInfoWss.EventType == "outboundAccountInfo" && accountInfoWss.EventTime > _lastAccountEventTime)
                     {
-                        _accountInfo.Balances = accountInfoWss.Balances;
+                        _accountInfo.Balances.Clear();
+                        foreach (var balanceWss in accountInfoWss.Balances)
+                        {
+                            var balance = new Balance()
+                            {
+                                Asset = balanceWss.Asset,
+                                Free = balanceWss.Free,
+                                Locked = balanceWss.Locked
+                            };
+                            _accountInfo.Balances.Add(balance);
+                        }
                         _accountInfo.BuyerCommission = accountInfoWss.BuyerCommission;
                         _accountInfo.CanDeposit = accountInfoWss.CanDeposit;
                         _accountInfo.CanTrade = accountInfoWss.CanTrade;

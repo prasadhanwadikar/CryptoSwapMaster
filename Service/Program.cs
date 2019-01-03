@@ -17,7 +17,7 @@ namespace BinanceService
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new OrderExecutor()
+                new BotsManager()
             };
             ServiceBase.Run(ServicesToRun);
         }

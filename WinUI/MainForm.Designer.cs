@@ -47,8 +47,6 @@
             this.txtApiKey = new System.Windows.Forms.TextBox();
             this.lblSecretKey = new System.Windows.Forms.Label();
             this.lblApiKey = new System.Windows.Forms.Label();
-            this.start = new System.Windows.Forms.Button();
-            this.stop = new System.Windows.Forms.Button();
             this.tcSections.SuspendLayout();
             this.tpDashboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitDashboard)).BeginInit();
@@ -56,7 +54,6 @@
             this.splitDashboard.Panel2.SuspendLayout();
             this.splitDashboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgBalance)).BeginInit();
-            this.tpOrdersHistory.SuspendLayout();
             this.tpSettings.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -135,8 +132,6 @@
             // 
             // tpOrdersHistory
             // 
-            this.tpOrdersHistory.Controls.Add(this.stop);
-            this.tpOrdersHistory.Controls.Add(this.start);
             this.tpOrdersHistory.Location = new System.Drawing.Point(4, 44);
             this.tpOrdersHistory.Margin = new System.Windows.Forms.Padding(0);
             this.tpOrdersHistory.Name = "tpOrdersHistory";
@@ -288,26 +283,6 @@
             this.lblApiKey.TabIndex = 0;
             this.lblApiKey.Text = "Api Key";
             // 
-            // start
-            // 
-            this.start.Location = new System.Drawing.Point(458, 84);
-            this.start.Name = "start";
-            this.start.Size = new System.Drawing.Size(88, 39);
-            this.start.TabIndex = 0;
-            this.start.Text = "Start";
-            this.start.UseVisualStyleBackColor = true;
-            this.start.Click += new System.EventHandler(this.start_Click);
-            // 
-            // stop
-            // 
-            this.stop.Location = new System.Drawing.Point(458, 204);
-            this.stop.Name = "stop";
-            this.stop.Size = new System.Drawing.Size(88, 39);
-            this.stop.TabIndex = 1;
-            this.stop.Text = "Stop";
-            this.stop.UseVisualStyleBackColor = true;
-            this.stop.Click += new System.EventHandler(this.stop_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -330,7 +305,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitDashboard)).EndInit();
             this.splitDashboard.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgBalance)).EndInit();
-            this.tpOrdersHistory.ResumeLayout(false);
             this.tpSettings.ResumeLayout(false);
             this.tpSettings.PerformLayout();
             this.ResumeLayout(false);
@@ -358,7 +332,5 @@
         private System.Windows.Forms.CheckedListBox clbQuoteAssets;
         private System.Windows.Forms.Label lblIPValue;
         private System.Windows.Forms.Label lblIP;
-        private System.Windows.Forms.Button stop;
-        private System.Windows.Forms.Button start;
     }
 }

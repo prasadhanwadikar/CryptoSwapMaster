@@ -20,6 +20,7 @@ namespace UI
 {
     public partial class MainForm : Form
     {
+        private readonly object _quoteUpdateLock;
         private readonly System.Windows.Forms.Timer _timer;
         private readonly BackgroundWorker _bgwRefreshQuotes;
         private readonly Repository _db;
@@ -33,6 +34,8 @@ namespace UI
         public MainForm()
         {
             InitializeComponent();
+
+            _quoteUpdateLock = new object();
 
             _bgwRefreshQuotes = new BackgroundWorker {WorkerSupportsCancellation = true};
             _bgwRefreshQuotes.DoWork += RefreshQuotes;
@@ -276,7 +279,10 @@ namespace UI
                         }
                     }
 
-                    newRow[quoteAsset] = quoteValue;
+                    lock (_quoteUpdateLock)
+                    {
+                        newRow[quoteAsset] = quoteValue;
+                    }
                 });
             }
 
@@ -396,16 +402,6 @@ namespace UI
                 err = "Invalid Secret Key";
             }
             MessageBox.Show(err, "Binance Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        private void start_Click(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void stop_Click(object sender, EventArgs e)
-        {
-            
         }
     }
 }

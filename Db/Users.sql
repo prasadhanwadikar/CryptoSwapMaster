@@ -3,6 +3,9 @@
     [Ip]        NVARCHAR (25)  NOT NULL,
     [ApiKey]    NVARCHAR (100) NOT NULL,
     [SecretKey] NVARCHAR (100) NOT NULL,
-    PRIMARY KEY CLUSTERED ([Id] ASC)
+    [BotStatus] INT            NOT NULL,
+    [BotStatusMsg] NVARCHAR(1000) NULL, 
+    PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [UK_Users_ApiKey] UNIQUE NONCLUSTERED ([ApiKey] ASC, [SecretKey] ASC)
 );
 
