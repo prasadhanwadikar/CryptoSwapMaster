@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
+using log4net.Config;
 
 namespace BinanceService
 {
@@ -19,11 +20,12 @@ namespace BinanceService
     {
         private Task _botsManager;
         private CancellationTokenSource _cancelTokenSource;
-        private readonly ILog _logger = LogManager.GetLogger("BotsManager");
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(BotsManager));
         
         public BotsManager()
         {
             InitializeComponent();
+            XmlConfigurator.Configure();
         }
 
         protected override void OnStart(string[] args)
@@ -48,7 +50,7 @@ namespace BinanceService
             {
                 var db = new Repository();
 
-                while (!_cancelTokenSource.IsCancellationRequested)
+                while (!_cancelTokenSource.Token.IsCancellationRequested)
                 {
                     Thread.Sleep(1000);
 

@@ -31,7 +31,7 @@
             // 
             // BotsManager
             // 
-            this.ServiceName = "CryptoSwapMaster.BotsManager";
+            this.ServiceName = "BotsManager";
 
         }
 
