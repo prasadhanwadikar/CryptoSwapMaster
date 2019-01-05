@@ -1,4 +1,4 @@
-﻿namespace BinanceService
+﻿namespace BotsManagerService
 {
     partial class ProjectInstaller
     {
@@ -39,8 +39,9 @@
             // 
             // serviceInstaller1
             // 
-            this.serviceInstaller1.DisplayName = "CryptoSwapMaster BotsManager";
-            this.serviceInstaller1.ServiceName = "BotsManager";
+            this.serviceInstaller1.Description = "CryptoSwapMaster Bots Manager Service";
+            this.serviceInstaller1.DisplayName = "BotsManagerService";
+            this.serviceInstaller1.ServiceName = "BotsManagerService";
             // 
             // ProjectInstaller
             // 

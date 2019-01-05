@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using log4net;
 using log4net.Config;
 
-namespace BinanceService
+namespace BotsManagerService
 {
     public partial class BotsManager : ServiceBase
     {
@@ -30,6 +30,11 @@ namespace BinanceService
 
         protected override void OnStart(string[] args)
         {
+            Start();
+        }
+
+        public void Start()
+        {
             try
             {
                 _cancelTokenSource = new CancellationTokenSource();
@@ -38,16 +43,18 @@ namespace BinanceService
             }
             catch (Exception ex)
             {
-                _logger.Error("BotsManager failed to start. Error:  " + ex.Message);
+                _logger.Error("BotsManager failed to start. Error:  " + ex.Message, ex);
             }
         }
 
         private void ManageBots()
         {
+            Thread.CurrentThread.Name = "BotsManager";
             var bots = new Dictionary<int, Bot>();
 
             try
             {
+                _logger.Info("BotsManager started");
                 var db = new Repository();
 
                 while (!_cancelTokenSource.Token.IsCancellationRequested)
@@ -84,7 +91,7 @@ namespace BinanceService
             }
             catch (Exception ex)
             {
-                _logger.Error("BotsManager stopped with error: " + ex.Message);
+                _logger.Error("Error: " + ex.Message, ex);
             }
             finally
             {
@@ -93,17 +100,21 @@ namespace BinanceService
                     bot.Value.CTS.Cancel();
                 }
                 Task.WaitAll(bots.Values.Select(x => x.Task).ToArray());
+                _logger.Info("BotsManager stopped");
             }
         }
 
         private void RunBot(Bot b)
         {
             var db = new Repository();
-            var binance = new BinanceApiClient(b.User.ApiKey, b.User.SecretKey);
-
             try
             {
+                Thread.CurrentThread.Name = "Bot" + b.User.Id;
+                var binance = new BinanceApiClient(b.User.ApiKey, b.User.SecretKey);
+
                 db.UpdateBotStatus(b.User.Id, BotStatus.Running);
+
+                _logger.Info(Thread.CurrentThread.Name + " started");
 
                 while (!b.CTS.IsCancellationRequested)
                 {
@@ -116,17 +127,26 @@ namespace BinanceService
             {
                 try
                 {
-                    _logger.Error("Bot " + b.User.Id + " stopped with error: " + ex.Message);
+                    _logger.Error("Error: " + ex.Message, ex);
                     db.UpdateBotStatus(b.User.Id, BotStatus.Stopped, ex.Message);
                 }
                 catch (Exception ex2)
                 {
-                    _logger.Error("Bot " + b.User.Id + " stopped but failed to update its status because of error: " + ex2.Message);
+                    _logger.Error("Failed to update bot status because of error: " + ex2.Message, ex2);
                 }
+            }
+            finally
+            {
+                _logger.Info(Thread.CurrentThread.Name + " stopped");
             }
         }
 
         protected override void OnStop()
+        {
+            Stop();
+        }
+
+        public new void Stop()
         {
             try
             {
@@ -135,7 +155,7 @@ namespace BinanceService
             }
             catch (Exception ex)
             {
-                _logger.Error("BotsManager failed to stop. Error:  " + ex.Message);
+                _logger.Error("BotsManager failed to stop. Error:  " + ex.Message, ex);
             }
         }
     }

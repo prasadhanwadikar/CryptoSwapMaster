@@ -1,4 +1,4 @@
-﻿namespace BinanceService
+﻿namespace BotsManagerService
 {
     partial class BotsManager
     {
