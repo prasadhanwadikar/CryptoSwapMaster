@@ -118,7 +118,11 @@ namespace BotsManagerService
 
                 while (!b.CTS.IsCancellationRequested)
                 {
-                    Thread.Sleep(3000);
+                    var orders = db.GetOrders(b.User.Id);
+                    foreach (var order in orders)
+                    {
+                        
+                    }
                 }
 
                 db.UpdateBotStatus(b.User.Id, BotStatus.Stopped);

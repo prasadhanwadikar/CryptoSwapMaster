@@ -21,28 +21,50 @@ namespace BinanceApiAdapter
 {
     public class BinanceApiClient
     {
-        private readonly AccountInfo _accountInfo;
         private readonly RestClient _client;
         private readonly ConcurrentDictionary<string, SymbolOrdersInfo> _orderBook;
         private string _apiKey;
         private HMACSHA256 _hmac;
+        private volatile AccountInfo _accountInfo;
         private WebSocket _wsAccountInfo;
-        private long _lastAccountEventTime;
+
+        public ExchangeInfo ExchangeInfo
+        {
+            get
+            {
+                //todo: implement timed caching
+                var request = new RestRequest("/api/v1/exchangeInfo", Method.GET, DataFormat.Json);
+                return ProcessRequest<ExchangeInfo>(request);
+            }
+        }
+
+        public AccountInfo AccountInfo
+        {
+            get
+            {
+                //todo: fix and test GetAccountInfoWss()
+                if (_wsAccountInfo == null || !_wsAccountInfo.IsAlive) Task.Run(() => GetAccountInfoWss());
+                if (_accountInfo != null && _wsAccountInfo != null && _wsAccountInfo.IsAlive) return _accountInfo;
+                var request = new RestRequest("/api/v3/account", Method.GET, DataFormat.Json);
+                return ProcessRequest<AccountInfo>(request, SecurityType.USER_DATA);
+            }
+        }
 
         public BinanceApiClient(string apiKey, string secretKey)
         {
-            _accountInfo = new AccountInfo();
             _orderBook = new ConcurrentDictionary<string, SymbolOrdersInfo>();
             ResetApiKeys(apiKey, secretKey);
             _client = new RestClient("https://api.binance.com");
             _client.AddHandler("application/json", new RestSharpJsonSerializer());
-            // request.JsonSerializer = new RestSharpJsonSerializer(); ----- use if sending JSON body
+            //request.JsonSerializer = new RestSharpJsonSerializer(); ----- use if sending JSON body
         }
 
         public void ResetApiKeys(string apiKey, string secretKey)
         {
             _apiKey = apiKey;
             _hmac = new HMACSHA256(Encoding.ASCII.GetBytes(secretKey));
+            if (_wsAccountInfo != null && _wsAccountInfo.IsAlive) _wsAccountInfo.Close(CloseStatusCode.Away, "User changed ApiKey or Secret key");
+            _accountInfo = null;
         }
 
         private T ProcessRequest<T>(IRestRequest request, SecurityType securityType = SecurityType.NONE)
@@ -82,6 +104,72 @@ namespace BinanceApiAdapter
             return ProcessRequest<ServerTime>(serverTimeRequest).Time;
         }
 
+        private void GetAccountInfoWss()
+        {
+            try
+            {
+                long lastAccountEventTime = 0;
+                var listenKey = NewUserDataStream();
+                var jsonSerializer = new JsonSerializer();
+                _wsAccountInfo = new WebSocket("wss://stream.binance.com:9443/ws/" + listenKey);
+                _wsAccountInfo.OnOpen += (s, e) =>
+                {
+                    KeepAliveUserDataStream(listenKey);
+                };
+                _wsAccountInfo.OnMessage += (s, e) =>
+                {
+                    var accountInfoWss = jsonSerializer.Deserialize<AccountInfoWss>(e.Data);
+                    if (accountInfoWss.EventType == "outboundAccountInfo" && accountInfoWss.EventTime > lastAccountEventTime)
+                    {
+                        _accountInfo = new AccountInfo
+                                            {
+                                                Balances = accountInfoWss.Balances.Select(b => new Balance
+                                                {
+                                                    Asset = b.Asset,
+                                                    Free = b.Free,
+                                                    Locked = b.Locked
+                                                }).ToList(),
+                                                CanTrade = accountInfoWss.CanTrade,
+                                                UpdateTime = accountInfoWss.UpdateTime,
+                                                SellerCommission = accountInfoWss.SellerCommission,
+                                                TakerCommission = accountInfoWss.TakerCommission,
+                                                MakerCommission = accountInfoWss.MakerCommission,
+                                                BuyerCommission = accountInfoWss.BuyerCommission,
+                                                CanDeposit = accountInfoWss.CanDeposit,
+                                                CanWithdraw = accountInfoWss.CanWithdraw
+                                            };
+
+                        if (accountInfoWss.EventTime - lastAccountEventTime > 25 * 60 * 1000)
+                        {
+                            KeepAliveUserDataStream(listenKey);
+                            lastAccountEventTime = accountInfoWss.EventTime;
+                        }
+                    }
+                };
+                _wsAccountInfo.OnError += (s, e) =>
+                {
+                    if (_wsAccountInfo.IsAlive) _wsAccountInfo.Close(CloseStatusCode.ServerError, e.Message);
+                };
+                _wsAccountInfo.OnClose += (s, e) =>
+                {
+                    try
+                    {
+                        CloseUserDataStream(listenKey);
+                    }
+                    catch (Exception ex)
+                    {
+                        //todo: log ex
+                    }
+                    //log e.Reason
+                };
+                _wsAccountInfo.Connect();
+            }
+            catch (Exception ex)
+            {
+                //log ex
+            }
+        }
+
         private string NewUserDataStream()
         {
             var request = new RestRequest("/api/v1/userDataStream", Method.POST, DataFormat.Json);
@@ -102,88 +190,39 @@ namespace BinanceApiAdapter
             ProcessRequest<EmptyResponse>(request, SecurityType.USER_STREAM);
         }
 
-        public AccountInfo GetAccountInfo()
+        public bool IsInsufficientFreeBalance(Balance balance)
         {
-            if (CurrentServerTime() - _accountInfo.UpdateTime < 10000) return _accountInfo;
-            if (_wsAccountInfo == null || !_wsAccountInfo.IsAlive) Task.Run(() => GetAccountInfoWss());
-            var request = new RestRequest("/api/v3/account", Method.GET, DataFormat.Json);
-            return ProcessRequest<AccountInfo>(request, SecurityType.USER_DATA);
-        }
+            double quoteQty;
+            double baseQty;
+            var symbol = balance.Asset == "USDT" || balance.Asset == "BTC" ? "BTCUSDT" : balance.Asset + "BTC";
 
-        private void GetAccountInfoWss()
-        {
-            try
+            if (balance.Asset == "USDT")
             {
-                var listenKey = NewUserDataStream();
-                var jsonSerializer = new JsonSerializer();
-                _wsAccountInfo = new WebSocket("wss://stream.binance.com:9443/ws/" + listenKey);
-                _wsAccountInfo.OnOpen += (s, e) =>
-                {
-                    KeepAliveUserDataStream(listenKey);
-                };
-                _wsAccountInfo.OnMessage += (s, e) =>
-                {
-                    var accountInfoWss = jsonSerializer.Deserialize<AccountInfoWss>(e.Data);
-                    if (accountInfoWss.EventType == "outboundAccountInfo" && accountInfoWss.EventTime > _lastAccountEventTime)
-                    {
-                        _accountInfo.Balances.Clear();
-                        foreach (var balanceWss in accountInfoWss.Balances)
-                        {
-                            var balance = new Balance()
-                            {
-                                Asset = balanceWss.Asset,
-                                Free = balanceWss.Free,
-                                Locked = balanceWss.Locked
-                            };
-                            _accountInfo.Balances.Add(balance);
-                        }
-                        _accountInfo.BuyerCommission = accountInfoWss.BuyerCommission;
-                        _accountInfo.CanDeposit = accountInfoWss.CanDeposit;
-                        _accountInfo.CanTrade = accountInfoWss.CanTrade;
-                        _accountInfo.CanWithdraw = accountInfoWss.CanWithdraw;
-                        _accountInfo.MakerCommission = accountInfoWss.MakerCommission;
-                        _accountInfo.SellerCommission = accountInfoWss.SellerCommission;
-                        _accountInfo.TakerCommission = accountInfoWss.TakerCommission;
-                        _accountInfo.UpdateTime = accountInfoWss.UpdateTime;
-
-                        if (accountInfoWss.EventTime - _lastAccountEventTime > 25 * 60 * 1000)
-                        {
-                            KeepAliveUserDataStream(listenKey);
-                            _lastAccountEventTime = accountInfoWss.EventTime;
-                        }
-                    }
-                };
-                _wsAccountInfo.OnError += (s, e) =>
-                {
-                    if (_wsAccountInfo.IsAlive) _wsAccountInfo.Close(CloseStatusCode.ServerError, e.Message);
-                };
-                _wsAccountInfo.OnClose += (s, e) =>
-                {
-                    try
-                    {
-                        CloseUserDataStream(listenKey);
-                    }
-                    catch (Exception ex)
-                    {
-                        //log ex
-                    }
-                    //log e.Reason
-                };
-                _wsAccountInfo.Connect();
+                baseQty = balance.Free / GetPrice(symbol);
+                quoteQty = balance.Free;
             }
-            catch (Exception ex)
+            else
             {
-                //log ex
+                baseQty = balance.Free;
+                quoteQty = balance.Free * GetPrice(symbol);
             }
+
+            var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
+            var minNotionalFilter = symbolInfo.Filters.FirstOrDefault(x => x.FilterType == FilterType.MIN_NOTIONAL);
+            if (minNotionalFilter != null)
+            {
+                if (quoteQty < minNotionalFilter.MinNotional) return true;
+            }
+            var lotSizeFilter = symbolInfo.Filters.FirstOrDefault(x => x.FilterType == FilterType.LOT_SIZE);
+            if (lotSizeFilter != null)
+            {
+                if (baseQty < lotSizeFilter.MinQty) return true;
+            }
+
+            return false;
         }
 
-        public ExchangeInfo GetExchangeInfo()
-        {
-            var request = new RestRequest("/api/v1/exchangeInfo", Method.GET, DataFormat.Json);
-            return ProcessRequest<ExchangeInfo>(request);
-        }
-
-        public double GetPrice(string symbol)
+        private double GetPrice(string symbol)
         {
             var request = new RestRequest("/api/v3/ticker/price", Method.GET, DataFormat.Json);
             request.AddParameter("symbol", symbol);
@@ -191,7 +230,140 @@ namespace BinanceApiAdapter
             return symbolInfo.Price;
         }
 
-        public SymbolOrdersInfo GetOrders(string symbol)
+        public double GetQuote(string baseAsset, string quoteAsset, double baseQty)
+        {
+            var quoteQty = 0.0;
+            var btcQty = 0.0;
+            var commissionFactor = (10000 - AccountInfo.TakerCommission) / 10000;
+
+            if (baseAsset == quoteAsset)
+            {
+                quoteQty = baseQty;
+            }
+            else if (ExchangeInfo.Symbols.Any(x => x.Symbol == baseAsset + quoteAsset))
+            {
+                //sell - look for bids
+                var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAsset + quoteAsset);
+                var symbolOrdersInfo = GetOrders(symbolInfo.Symbol);
+                foreach (var bid in symbolOrdersInfo.BidOrders)
+                {
+                    if (baseQty <= bid.Qty)
+                    {
+                        quoteQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
+                        break;
+                    }
+                    baseQty -= bid.Qty;
+                    quoteQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
+                }
+            }
+            else if (ExchangeInfo.Symbols.Any(x => x.Symbol == quoteAsset + baseAsset))
+            {
+                //buy - look for asks
+                var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == quoteAsset + baseAsset);
+                var symbolOrdersInfo = GetOrders(symbolInfo.Symbol);
+                foreach (var ask in symbolOrdersInfo.AskOrders)
+                {
+                    if (baseQty <= ask.Qty * ask.Price)
+                    {
+                        quoteQty += Math.Round(baseQty / ask.Price * commissionFactor, symbolInfo.BaseAssetPrecision);
+                        break;
+                    }
+                    baseQty -= Math.Round(ask.Qty * ask.Price, symbolInfo.BaseAssetPrecision);
+                    quoteQty += ask.Qty * commissionFactor;
+                }
+            }
+            else if (baseAsset == "USDT")
+            {
+                //buy - look for asks
+                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == "BTC" + baseAsset);
+                var symbolOrdersInfo1 = GetOrders(symbolInfo1.Symbol);
+                foreach (var ask in symbolOrdersInfo1.AskOrders)
+                {
+                    if (baseQty <= ask.Qty * ask.Price)
+                    {
+                        btcQty += Math.Round(baseQty / ask.Price * commissionFactor, symbolInfo1.BaseAssetPrecision);
+                        break;
+                    }
+                    baseQty -= Math.Round(ask.Qty * ask.Price, symbolInfo1.BaseAssetPrecision);
+                    btcQty += ask.Qty * commissionFactor;
+                }
+                //buy - look for asks
+                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == quoteAsset + "BTC");
+                var symbolOrdersInfo2 = GetOrders(symbolInfo2.Symbol);
+                foreach (var ask in symbolOrdersInfo2.AskOrders)
+                {
+                    if (btcQty <= ask.Qty * ask.Price)
+                    {
+                        quoteQty += Math.Round(btcQty / ask.Price * commissionFactor, symbolInfo2.BaseAssetPrecision);
+                        break;
+                    }
+                    btcQty -= Math.Round(ask.Qty * ask.Price, symbolInfo2.BaseAssetPrecision);
+                    quoteQty += ask.Qty * commissionFactor;
+                }
+            }
+            else if (quoteAsset == "USDT")
+            {
+                //sell - look for bids
+                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAsset + "BTC");
+                var symbolOrdersInfo1 = GetOrders(symbolInfo1.Symbol);
+                foreach (var bid in symbolOrdersInfo1.BidOrders)
+                {
+                    if (baseQty <= bid.Qty)
+                    {
+                        btcQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
+                        break;
+                    }
+                    baseQty -= bid.Qty;
+                    btcQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
+                }
+                //sell - look for bids
+                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == "BTC" + quoteAsset);
+                var symbolOrdersInfo2 = GetOrders(symbolInfo2.Symbol);
+                foreach (var bid in symbolOrdersInfo2.BidOrders)
+                {
+                    if (btcQty <= bid.Qty)
+                    {
+                        quoteQty += Math.Round(btcQty * bid.Price * commissionFactor, symbolInfo2.QuotePrecision);
+                        break;
+                    }
+                    btcQty -= bid.Qty;
+                    quoteQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo2.QuotePrecision);
+                }
+            }
+            else
+            {
+                //sell - look for bids
+                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAsset + "BTC");
+                var symbolOrdersInfo1 = GetOrders(symbolInfo1.Symbol);
+                foreach (var bid in symbolOrdersInfo1.BidOrders)
+                {
+                    if (baseQty <= bid.Qty)
+                    {
+                        btcQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
+                        break;
+                    }
+                    baseQty -= bid.Qty;
+                    btcQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
+                }
+                //buy - look for asks
+                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == quoteAsset + "BTC");
+                var symbolOrdersInfo2 = GetOrders(symbolInfo2.Symbol);
+                foreach (var ask in symbolOrdersInfo2.AskOrders)
+                {
+                    if (btcQty <= ask.Qty * ask.Price)
+                    {
+                        quoteQty += Math.Round(btcQty / ask.Price * commissionFactor, symbolInfo2.BaseAssetPrecision);
+                        break;
+                    }
+                    btcQty -= Math.Round(ask.Qty * ask.Price, symbolInfo2.BaseAssetPrecision);
+                    quoteQty += ask.Qty * commissionFactor;
+                }
+            }
+
+            return quoteQty;
+        }
+
+        private SymbolOrdersInfo GetOrders(string symbol)
         {
             if (_orderBook.ContainsKey(symbol)) return _orderBook[symbol];
             Task.Run(() => GetOrdersWss(symbol));
@@ -235,7 +407,7 @@ namespace BinanceApiAdapter
             }
             catch (Exception ex)
             {
-                //log ex
+                //todo: log ex
             }
         }
 

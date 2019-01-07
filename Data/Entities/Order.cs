@@ -30,7 +30,7 @@ namespace Data.Entities
         public double BaseQty { get; set; }
 
         [Required]
-        public double BaseUnitPrice { get; set; }
+        public double QuoteQty { get; set; }
 
         [Required]
         public int Status { get; set; }

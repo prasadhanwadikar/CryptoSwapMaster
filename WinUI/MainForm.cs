@@ -25,8 +25,6 @@ namespace UI
         private readonly BackgroundWorker _bgwRefreshQuotes;
         private readonly Repository _db;
         private BinanceApiClient _binance;
-        private ExchangeInfo _exchangeInfo;
-        private AccountInfo _accountInfo;
         private List<string> _allAssets;
         private List<string> _quoteAssets;
         private User _user;
@@ -48,6 +46,7 @@ namespace UI
             _timer.Tick += TimerOnElapsed;
 
             _db = new Repository();
+            _binance = new BinanceApiClient("", "");
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -62,9 +61,11 @@ namespace UI
                     MessageBox.Show("Provide ApiKey and SecretKey to get started!", "Unknown IP", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
                 }
+
                 txtApiKey.Text = _user.ApiKey;
                 txtSecretKey.Text = _user.SecretKey;
-                _binance = new BinanceApiClient(_user.ApiKey, _user.SecretKey);
+                _binance.ResetApiKeys(_user.ApiKey, _user.SecretKey);
+
                 LoadDashboard();
             }
             catch (Exception ex)
@@ -96,12 +97,9 @@ namespace UI
 
         private void RefreshQuotes(object sender, DoWorkEventArgs e)
         {
-            _exchangeInfo = _binance.GetExchangeInfo();
-            _accountInfo = _binance.GetAccountInfo();
-            _allAssets = _accountInfo.Balances.Select(x => x.Asset).ToList();
+            _allAssets = _binance.AccountInfo.Balances.Select(x => x.Asset).ToList();
             _quoteAssets = _db.GetQuoteAssets(_user.Id).Select(x => x.Asset).Where(y => _allAssets.Any(z => z == y)).ToList();
 
-            var commissionFactor = (10000 - _accountInfo.TakerCommission) / 10000;
             var dtBalance = new DataTable("Balances");
             dtBalance.Columns.Add("Coin");
             dtBalance.Columns.Add("Balance");
@@ -110,178 +108,19 @@ namespace UI
                 dtBalance.Columns.Add(asset);
             }
 
-            foreach (var baseAssetBalance in _accountInfo.Balances.Where(x => x.Free > 0))
+            foreach (var balance in _binance.AccountInfo.Balances.Where(x => x.Free > 0))
             {
-                SymbolInfo baseBtcSymbolInfo;
-                double freeBaseAssetQuoteValue;
-                double freeBaseAssetQty;
-
-                if (baseAssetBalance.Asset == "USDT" || baseAssetBalance.Asset == "BTC")
-                    baseBtcSymbolInfo = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == "BTCUSDT");
-                else
-                    baseBtcSymbolInfo = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAssetBalance.Asset + "BTC");
-
-                if (baseAssetBalance.Asset == "USDT")
-                {
-                    freeBaseAssetQuoteValue = baseAssetBalance.Free;
-                    freeBaseAssetQty = baseAssetBalance.Free / _binance.GetPrice(baseBtcSymbolInfo.Symbol);
-                }
-                else
-                {
-                    freeBaseAssetQuoteValue = baseAssetBalance.Free * _binance.GetPrice(baseBtcSymbolInfo.Symbol);
-                    freeBaseAssetQty = baseAssetBalance.Free;
-                }
-
-                var minNotionalFilter = baseBtcSymbolInfo.Filters.FirstOrDefault(x => x.FilterType == FilterType.MIN_NOTIONAL);
-                if (minNotionalFilter != null)
-                {
-                    if (freeBaseAssetQuoteValue < minNotionalFilter.MinNotional) continue;
-                }
-
-                var lotSizeFilter = baseBtcSymbolInfo.Filters.FirstOrDefault(x => x.FilterType == FilterType.LOT_SIZE);
-                if (lotSizeFilter != null)
-                {
-                    if (freeBaseAssetQty < lotSizeFilter.MinQty) continue;
-                }
+                if (_binance.IsInsufficientFreeBalance(balance)) continue;
 
                 var newRow = dtBalance.Rows.Add();
-                newRow["Coin"] = baseAssetBalance.Asset;
-                newRow["Balance"] = baseAssetBalance.Free;
-
-                //foreach (var quoteAsset in _quoteAssets)
+                newRow["Coin"] = balance.Asset;
+                newRow["Balance"] = balance.Free;
                 Parallel.ForEach(_quoteAssets, (quoteAsset) =>
                 {
-                    var baseValue = baseAssetBalance.Free;
-                    var quoteValue = 0.0;
-                    var btcValue = 0.0;
-
-                    if (baseAssetBalance.Asset == quoteAsset)
-                    {
-                        quoteValue = baseAssetBalance.Free;
-                    }
-                    else if (_exchangeInfo.Symbols.Any(x => x.Symbol == baseAssetBalance.Asset + quoteAsset))
-                    {
-                        //sell - look for bids
-                        var symbolInfo = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAssetBalance.Asset + quoteAsset);
-                        var symbolOrdersInfo = _binance.GetOrders(symbolInfo.Symbol);
-                        foreach (var bid in symbolOrdersInfo.BidOrders)
-                        {
-                            if (baseValue <= bid.Qty)
-                            {
-                                quoteValue += Math.Round(baseValue * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
-                                break;
-                            }
-                            baseValue -= bid.Qty;
-                            quoteValue += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
-                        }
-                    }
-                    else if (_exchangeInfo.Symbols.Any(x => x.Symbol == quoteAsset + baseAssetBalance.Asset))
-                    {
-                        //buy - look for asks
-                        var symbolInfo = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == quoteAsset + baseAssetBalance.Asset);
-                        var symbolOrdersInfo = _binance.GetOrders(symbolInfo.Symbol);
-                        foreach (var ask in symbolOrdersInfo.AskOrders)
-                        {
-                            if (baseValue <= ask.Qty * ask.Price)
-                            {
-                                quoteValue += Math.Round(baseValue / ask.Price * commissionFactor, symbolInfo.BaseAssetPrecision);
-                                break;
-                            }
-                            baseValue -= Math.Round(ask.Qty * ask.Price, symbolInfo.BaseAssetPrecision);
-                            quoteValue += ask.Qty * commissionFactor;
-                        }
-                    }
-                    else if (baseAssetBalance.Asset == "USDT")
-                    {
-                        //buy - look for asks
-                        var symbolInfo1 = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == "BTC" + baseAssetBalance.Asset);
-                        var symbolOrdersInfo1 = _binance.GetOrders(symbolInfo1.Symbol);
-                        foreach (var ask in symbolOrdersInfo1.AskOrders)
-                        {
-                            if (baseValue <= ask.Qty * ask.Price)
-                            {
-                                btcValue += Math.Round(baseValue / ask.Price * commissionFactor, symbolInfo1.BaseAssetPrecision);
-                                break;
-                            }
-                            baseValue -= Math.Round(ask.Qty * ask.Price, symbolInfo1.BaseAssetPrecision);
-                            btcValue += ask.Qty * commissionFactor;
-                        }
-                        //buy - look for asks
-                        var symbolInfo2 = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == quoteAsset + "BTC");
-                        var symbolOrdersInfo2 = _binance.GetOrders(symbolInfo2.Symbol);
-                        foreach (var ask in symbolOrdersInfo2.AskOrders)
-                        {
-                            if (btcValue <= ask.Qty * ask.Price)
-                            {
-                                quoteValue += Math.Round(btcValue / ask.Price * commissionFactor, symbolInfo2.BaseAssetPrecision);
-                                break;
-                            }
-                            btcValue -= Math.Round(ask.Qty * ask.Price, symbolInfo2.BaseAssetPrecision);
-                            quoteValue += ask.Qty * commissionFactor;
-                        }
-                    }
-                    else if (quoteAsset == "USDT")
-                    {
-                        //sell - look for bids
-                        var symbolInfo1 = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAssetBalance.Asset + "BTC");
-                        var symbolOrdersInfo1 = _binance.GetOrders(symbolInfo1.Symbol);
-                        foreach (var bid in symbolOrdersInfo1.BidOrders)
-                        {
-                            if (baseValue <= bid.Qty)
-                            {
-                                btcValue += Math.Round(baseValue * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
-                                break;
-                            }
-                            baseValue -= bid.Qty;
-                            btcValue += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
-                        }
-                        //sell - look for bids
-                        var symbolInfo2 = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == "BTC" + quoteAsset);
-                        var symbolOrdersInfo2 = _binance.GetOrders(symbolInfo2.Symbol);
-                        foreach (var bid in symbolOrdersInfo2.BidOrders)
-                        {
-                            if (btcValue <= bid.Qty)
-                            {
-                                quoteValue += Math.Round(btcValue * bid.Price * commissionFactor, symbolInfo2.QuotePrecision);
-                                break;
-                            }
-                            btcValue -= bid.Qty;
-                            quoteValue += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo2.QuotePrecision);
-                        }
-                    }
-                    else
-                    {
-                        //sell - look for bids
-                        var symbolInfo1 = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAssetBalance.Asset + "BTC");
-                        var symbolOrdersInfo1 = _binance.GetOrders(symbolInfo1.Symbol);
-                        foreach (var bid in symbolOrdersInfo1.BidOrders)
-                        {
-                            if (baseValue <= bid.Qty)
-                            {
-                                btcValue += Math.Round(baseValue * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
-                                break;
-                            }
-                            baseValue -= bid.Qty;
-                            btcValue += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
-                        }
-                        //buy - look for asks
-                        var symbolInfo2 = _exchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == quoteAsset + "BTC");
-                        var symbolOrdersInfo2 = _binance.GetOrders(symbolInfo2.Symbol);
-                        foreach (var ask in symbolOrdersInfo2.AskOrders)
-                        {
-                            if (btcValue <= ask.Qty * ask.Price)
-                            {
-                                quoteValue += Math.Round(btcValue / ask.Price * commissionFactor, symbolInfo2.BaseAssetPrecision);
-                                break;
-                            }
-                            btcValue -= Math.Round(ask.Qty * ask.Price, symbolInfo2.BaseAssetPrecision);
-                            quoteValue += ask.Qty * commissionFactor;
-                        }
-                    }
-
+                    var quoteQty = _binance.GetQuote(balance.Asset, quoteAsset, balance.Free);
                     lock (_quoteUpdateLock)
                     {
-                        newRow[quoteAsset] = quoteValue;
+                        newRow[quoteAsset] = quoteQty;
                     }
                 });
             }
@@ -328,9 +167,7 @@ namespace UI
                 try
                 {
                     _binance.ResetApiKeys(txtApiKey.Text.Trim(), txtSecretKey.Text.Trim());
-                    _exchangeInfo = _binance.GetExchangeInfo();
-                    _accountInfo = _binance.GetAccountInfo();
-                    _allAssets = _accountInfo.Balances.Select(x => x.Asset).ToList();
+                    _allAssets = _binance.AccountInfo.Balances.Select(x => x.Asset).ToList();
                 }
                 catch (BinanceException bex)
                 {

@@ -45,6 +45,14 @@ namespace Data
             }
         }
 
+        public List<Order> GetOrders(int userId)
+        {
+            using (var context = new Context())
+            {
+                return context.Orders.Where(x => x.UserId == userId).ToList();
+            }
+        }
+
         public User SaveUser(string ip, string apiKey, string secretKey, List<string> quoteAssets)
         {
             using (var context = new Context())
