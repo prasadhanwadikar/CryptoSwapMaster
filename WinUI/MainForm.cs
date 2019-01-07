@@ -46,7 +46,7 @@ namespace UI
             _timer.Tick += TimerOnElapsed;
 
             _db = new Repository();
-            _binance = new BinanceApiClient("", "");
+            _binance = new BinanceApiClient("", "", 30000, 9000);
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -64,7 +64,7 @@ namespace UI
 
                 txtApiKey.Text = _user.ApiKey;
                 txtSecretKey.Text = _user.SecretKey;
-                _binance.ResetApiKeys(_user.ApiKey, _user.SecretKey);
+                _binance.Reset(_user.ApiKey, _user.SecretKey, 30000, 9000);
 
                 LoadDashboard();
             }
@@ -97,7 +97,8 @@ namespace UI
 
         private void RefreshQuotes(object sender, DoWorkEventArgs e)
         {
-            _allAssets = _binance.AccountInfo.Balances.Select(x => x.Asset).ToList();
+            var accountInfo = _binance.AccountInfo;
+            _allAssets = accountInfo.Balances.Select(x => x.Asset).ToList();
             _quoteAssets = _db.GetQuoteAssets(_user.Id).Select(x => x.Asset).Where(y => _allAssets.Any(z => z == y)).ToList();
 
             var dtBalance = new DataTable("Balances");
@@ -108,7 +109,7 @@ namespace UI
                 dtBalance.Columns.Add(asset);
             }
 
-            foreach (var balance in _binance.AccountInfo.Balances.Where(x => x.Free > 0))
+            foreach (var balance in accountInfo.Balances.Where(x => x.Free > 0))
             {
                 if (_binance.IsInsufficientFreeBalance(balance)) continue;
 
@@ -117,7 +118,7 @@ namespace UI
                 newRow["Balance"] = balance.Free;
                 Parallel.ForEach(_quoteAssets, (quoteAsset) =>
                 {
-                    var quoteQty = _binance.GetQuote(balance.Asset, quoteAsset, balance.Free);
+                    var quoteQty = _binance.GetQuote(balance.Asset, quoteAsset, balance.Free, accountInfo.TakerCommission);
                     lock (_quoteUpdateLock)
                     {
                         newRow[quoteAsset] = quoteQty;
@@ -166,7 +167,7 @@ namespace UI
             {
                 try
                 {
-                    _binance.ResetApiKeys(txtApiKey.Text.Trim(), txtSecretKey.Text.Trim());
+                    _binance.Reset(txtApiKey.Text.Trim(), txtSecretKey.Text.Trim(), 30000, 9000);
                     _allAssets = _binance.AccountInfo.Balances.Select(x => x.Asset).ToList();
                 }
                 catch (BinanceException bex)

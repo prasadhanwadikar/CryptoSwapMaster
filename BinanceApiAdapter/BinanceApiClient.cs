@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Runtime.Remoting.Messaging;
+using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Text;
@@ -25,16 +26,33 @@ namespace BinanceApiAdapter
         private readonly ConcurrentDictionary<string, SymbolOrdersInfo> _orderBook;
         private string _apiKey;
         private HMACSHA256 _hmac;
-        private volatile AccountInfo _accountInfo;
+        
+        private ExchangeInfo _exchangeInfo;
+        private object _exchangeInfoLock;
+        private long _lastExchangeInfoTicks;
+        private long _exchangeInfoCacheDuration;
+
+        private AccountInfo _accountInfo;
+        private object _accountInfoLock;
+        private long _lastAccountInfoTicks;
+        private long _accountInfoCacheDuration;
         private WebSocket _wsAccountInfo;
 
         public ExchangeInfo ExchangeInfo
         {
             get
             {
-                //todo: implement timed caching
-                var request = new RestRequest("/api/v1/exchangeInfo", Method.GET, DataFormat.Json);
-                return ProcessRequest<ExchangeInfo>(request);
+                lock (_exchangeInfoLock)
+                {
+                    if (_exchangeInfo == null || DateTime.UtcNow.Ticks - _lastExchangeInfoTicks > _exchangeInfoCacheDuration)
+                    {
+                        var request = new RestRequest("/api/v1/exchangeInfo", Method.GET, DataFormat.Json);
+                        _exchangeInfo = ProcessRequest<ExchangeInfo>(request);
+                        _lastExchangeInfoTicks = DateTime.UtcNow.Ticks;
+                    }
+
+                    return _exchangeInfo;
+                }
             }
         }
 
@@ -42,29 +60,41 @@ namespace BinanceApiAdapter
         {
             get
             {
-                //todo: fix and test GetAccountInfoWss()
-                if (_wsAccountInfo == null || !_wsAccountInfo.IsAlive) Task.Run(() => GetAccountInfoWss());
-                if (_accountInfo != null && _wsAccountInfo != null && _wsAccountInfo.IsAlive) return _accountInfo;
-                var request = new RestRequest("/api/v3/account", Method.GET, DataFormat.Json);
-                return ProcessRequest<AccountInfo>(request, SecurityType.USER_DATA);
+                lock (_accountInfoLock)
+                {
+                    if (_accountInfo == null || DateTime.UtcNow.Ticks - _lastAccountInfoTicks > _accountInfoCacheDuration)
+                    {
+                        if (_wsAccountInfo == null || !_wsAccountInfo.IsAlive) Task.Run(() => GetAccountInfoWss());
+                        var request = new RestRequest("/api/v3/account", Method.GET, DataFormat.Json);
+                        _accountInfo = ProcessRequest<AccountInfo>(request, SecurityType.USER_DATA);
+                        _lastAccountInfoTicks = DateTime.UtcNow.Ticks;
+                    }
+
+                    return _accountInfo;
+                }
             }
         }
 
-        public BinanceApiClient(string apiKey, string secretKey)
+        public BinanceApiClient(string apiKey, string secretKey, long exchangeInfoCacheDuration, long accountInfoCacheDuration)
         {
+            _exchangeInfoLock = new object();
+            _accountInfoLock = new object();
             _orderBook = new ConcurrentDictionary<string, SymbolOrdersInfo>();
-            ResetApiKeys(apiKey, secretKey);
             _client = new RestClient("https://api.binance.com");
             _client.AddHandler("application/json", new RestSharpJsonSerializer());
             //request.JsonSerializer = new RestSharpJsonSerializer(); ----- use if sending JSON body
+
+            Reset(apiKey, secretKey, exchangeInfoCacheDuration, accountInfoCacheDuration);
         }
 
-        public void ResetApiKeys(string apiKey, string secretKey)
+        public void Reset(string apiKey, string secretKey, long exchangeInfoCacheDuration, long accountInfoCacheDuration)
         {
             _apiKey = apiKey;
             _hmac = new HMACSHA256(Encoding.ASCII.GetBytes(secretKey));
             if (_wsAccountInfo != null && _wsAccountInfo.IsAlive) _wsAccountInfo.Close(CloseStatusCode.Away, "User changed ApiKey or Secret key");
             _accountInfo = null;
+            _exchangeInfoCacheDuration = exchangeInfoCacheDuration;
+            _accountInfoCacheDuration = accountInfoCacheDuration;
         }
 
         private T ProcessRequest<T>(IRestRequest request, SecurityType securityType = SecurityType.NONE)
@@ -121,6 +151,7 @@ namespace BinanceApiAdapter
                     var accountInfoWss = jsonSerializer.Deserialize<AccountInfoWss>(e.Data);
                     if (accountInfoWss.EventType == "outboundAccountInfo" && accountInfoWss.EventTime > lastAccountEventTime)
                     {
+                        _lastAccountInfoTicks = DateTime.UtcNow.Ticks;
                         _accountInfo = new AccountInfo
                                             {
                                                 Balances = accountInfoWss.Balances.Select(b => new Balance
@@ -162,6 +193,7 @@ namespace BinanceApiAdapter
                     }
                     //log e.Reason
                 };
+                _wsAccountInfo.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Ssl3;
                 _wsAccountInfo.Connect();
             }
             catch (Exception ex)
@@ -230,11 +262,11 @@ namespace BinanceApiAdapter
             return symbolInfo.Price;
         }
 
-        public double GetQuote(string baseAsset, string quoteAsset, double baseQty)
+        public double GetQuote(string baseAsset, string quoteAsset, double baseQty, double takerCommission)
         {
             var quoteQty = 0.0;
             var btcQty = 0.0;
-            var commissionFactor = (10000 - AccountInfo.TakerCommission) / 10000;
+            var commissionFactor = (10000 - takerCommission) / 10000;
 
             if (baseAsset == quoteAsset)
             {
