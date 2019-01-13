@@ -15,13 +15,10 @@ namespace BinanceApiAdapter.Types
         public double OrigQty { get; set; }
         public double ExecutedQty { get; set; }
         public double CummulativeQuoteQty { get; set; }
-        [JsonProperty("status")]
-        public OrderStatus OrderStatus { get; set; }
+        public BinanceOrderStatus Status { get; set; }
         public TimeInForce TimeInForce { get; set; }
-        [JsonProperty("type")]
-        public OrderType OrderType { get; set; }
-        [JsonProperty("side")]
-        public OrderSide OrderSide { get; set; }
+        public BinanceOrderType Type { get; set; }
+        public BinanceOrderSide Side { get; set; }
         public List<OrderFill> Fills { get; set; }
 
         public OrderInfo()

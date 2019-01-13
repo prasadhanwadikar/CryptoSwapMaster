@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using Data.Enums;
 
 namespace Data.Entities
 {
@@ -18,7 +20,10 @@ namespace Data.Entities
         public int UserId { get; set; }
 
         [Required]
-        public int OrderGroup { get; set; }
+        public int Group { get; set; }
+
+        [Required]
+        public int SubGroup { get; set; }
 
         [Required]
         public string BaseAsset { get; set; }
@@ -30,14 +35,25 @@ namespace Data.Entities
         public double BaseQty { get; set; }
 
         [Required]
-        public double QuoteQty { get; set; }
+        public double ExpectedQuoteQty { get; set; }
+
+        public double? ReceivedQuoteQty { get; set; }
 
         [Required]
-        public int Status { get; set; }
+        public OrderStatus Status { get; set; }
+
+        public string StatusMsg { get; set; }
 
         [Required]
         public DateTime Created { get; set; }
 
-        public DateTime LastModified { get; set; }
+        public DateTime? LastModified { get; set; }
+
+        public List<ExchangeOrder> ExchangeOrders { get; set; }
+
+        public Order()
+        {
+            ExchangeOrders = new List<ExchangeOrder>();
+        }
     }
 }

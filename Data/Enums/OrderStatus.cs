@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BinanceApiAdapter.Enums
+namespace Data.Enums
 {
-    public enum OrderSide
+    public enum OrderStatus
     {
-        BUY,
-        SELL
+        Open = 1,
+        InProcess,
+        Cancelled,
+        Completed
     }
 }

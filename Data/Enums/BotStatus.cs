@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Data.Entities
+namespace Data.Enums
 {
     public enum BotStatus
     {
-        StartRequested,
+        StartRequested = 1,
         Running,
         StopRequested,
         Stopped

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Data.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -28,5 +29,10 @@ namespace Data.Entities
         public BotStatus BotStatus { get; set; }
 
         public string BotStatusMsg { get; set; }
+        
+        [Required]
+        public DateTime Created { get; set; }
+
+        public DateTime? LastModified { get; set; }
     }
 }

@@ -52,9 +52,9 @@
   <ItemGroup>
     <Compile Include="BinanceApiClient.cs" />
     <Compile Include="Enums\FilterType.cs" />
-    <Compile Include="Enums\OrderSide.cs" />
-    <Compile Include="Enums\OrderStatus.cs" />
-    <Compile Include="Enums\OrderType.cs" />
+    <Compile Include="Enums\BinanceOrderSide.cs" />
+    <Compile Include="Enums\BinanceOrderStatus.cs" />
+    <Compile Include="Enums\BinanceOrderType.cs" />
     <Compile Include="Enums\RateLimitType.cs" />
     <Compile Include="Enums\RateLimitInterval.cs" />
     <Compile Include="Enums\SecurityType.cs" />

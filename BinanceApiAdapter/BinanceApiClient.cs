@@ -262,37 +262,15 @@ namespace BinanceApiAdapter
             return symbolInfo.Price;
         }
 
-        public double GetQuote(string baseAsset, string quoteAsset, double baseQty, double takerCommission)
+        private double GetQuote(SymbolInfo symbolInfo, BinanceOrderSide orderSide, double baseQty, double takerCommission)
         {
             var quoteQty = 0.0;
-            var btcQty = 0.0;
             var commissionFactor = (10000 - takerCommission) / 10000;
 
-            if (baseAsset == quoteAsset)
+            var symbolOrdersInfo = GetOrders(symbolInfo.Symbol);
+
+            if (orderSide == BinanceOrderSide.BUY)
             {
-                quoteQty = baseQty;
-            }
-            else if (ExchangeInfo.Symbols.Any(x => x.Symbol == baseAsset + quoteAsset))
-            {
-                //sell - look for bids
-                var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAsset + quoteAsset);
-                var symbolOrdersInfo = GetOrders(symbolInfo.Symbol);
-                foreach (var bid in symbolOrdersInfo.BidOrders)
-                {
-                    if (baseQty <= bid.Qty)
-                    {
-                        quoteQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
-                        break;
-                    }
-                    baseQty -= bid.Qty;
-                    quoteQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
-                }
-            }
-            else if (ExchangeInfo.Symbols.Any(x => x.Symbol == quoteAsset + baseAsset))
-            {
-                //buy - look for asks
-                var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == quoteAsset + baseAsset);
-                var symbolOrdersInfo = GetOrders(symbolInfo.Symbol);
                 foreach (var ask in symbolOrdersInfo.AskOrders)
                 {
                     if (baseQty <= ask.Qty * ask.Price)
@@ -304,95 +282,142 @@ namespace BinanceApiAdapter
                     quoteQty += ask.Qty * commissionFactor;
                 }
             }
-            else if (baseAsset == "USDT")
-            {
-                //buy - look for asks
-                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == "BTC" + baseAsset);
-                var symbolOrdersInfo1 = GetOrders(symbolInfo1.Symbol);
-                foreach (var ask in symbolOrdersInfo1.AskOrders)
-                {
-                    if (baseQty <= ask.Qty * ask.Price)
-                    {
-                        btcQty += Math.Round(baseQty / ask.Price * commissionFactor, symbolInfo1.BaseAssetPrecision);
-                        break;
-                    }
-                    baseQty -= Math.Round(ask.Qty * ask.Price, symbolInfo1.BaseAssetPrecision);
-                    btcQty += ask.Qty * commissionFactor;
-                }
-                //buy - look for asks
-                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == quoteAsset + "BTC");
-                var symbolOrdersInfo2 = GetOrders(symbolInfo2.Symbol);
-                foreach (var ask in symbolOrdersInfo2.AskOrders)
-                {
-                    if (btcQty <= ask.Qty * ask.Price)
-                    {
-                        quoteQty += Math.Round(btcQty / ask.Price * commissionFactor, symbolInfo2.BaseAssetPrecision);
-                        break;
-                    }
-                    btcQty -= Math.Round(ask.Qty * ask.Price, symbolInfo2.BaseAssetPrecision);
-                    quoteQty += ask.Qty * commissionFactor;
-                }
-            }
-            else if (quoteAsset == "USDT")
-            {
-                //sell - look for bids
-                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAsset + "BTC");
-                var symbolOrdersInfo1 = GetOrders(symbolInfo1.Symbol);
-                foreach (var bid in symbolOrdersInfo1.BidOrders)
-                {
-                    if (baseQty <= bid.Qty)
-                    {
-                        btcQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
-                        break;
-                    }
-                    baseQty -= bid.Qty;
-                    btcQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
-                }
-                //sell - look for bids
-                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == "BTC" + quoteAsset);
-                var symbolOrdersInfo2 = GetOrders(symbolInfo2.Symbol);
-                foreach (var bid in symbolOrdersInfo2.BidOrders)
-                {
-                    if (btcQty <= bid.Qty)
-                    {
-                        quoteQty += Math.Round(btcQty * bid.Price * commissionFactor, symbolInfo2.QuotePrecision);
-                        break;
-                    }
-                    btcQty -= bid.Qty;
-                    quoteQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo2.QuotePrecision);
-                }
-            }
             else
             {
-                //sell - look for bids
-                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == baseAsset + "BTC");
-                var symbolOrdersInfo1 = GetOrders(symbolInfo1.Symbol);
-                foreach (var bid in symbolOrdersInfo1.BidOrders)
+                foreach (var bid in symbolOrdersInfo.BidOrders)
                 {
                     if (baseQty <= bid.Qty)
                     {
-                        btcQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
+                        quoteQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
                         break;
                     }
                     baseQty -= bid.Qty;
-                    btcQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo1.QuotePrecision);
-                }
-                //buy - look for asks
-                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == quoteAsset + "BTC");
-                var symbolOrdersInfo2 = GetOrders(symbolInfo2.Symbol);
-                foreach (var ask in symbolOrdersInfo2.AskOrders)
-                {
-                    if (btcQty <= ask.Qty * ask.Price)
-                    {
-                        quoteQty += Math.Round(btcQty / ask.Price * commissionFactor, symbolInfo2.BaseAssetPrecision);
-                        break;
-                    }
-                    btcQty -= Math.Round(ask.Qty * ask.Price, symbolInfo2.BaseAssetPrecision);
-                    quoteQty += ask.Qty * commissionFactor;
+                    quoteQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
                 }
             }
 
             return quoteQty;
+        }
+
+        public List<OrderInfo> BuildOrders(string baseAsset, string quoteAsset, double baseQty, double takerCommission)
+        {
+            var orders = new List<OrderInfo>();
+
+            if (ExchangeInfo.Symbols.Any(x => x.Symbol == baseAsset + quoteAsset))
+            {
+                //sell - look for bids
+                var symbol = baseAsset + quoteAsset;
+                var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
+                var order = new OrderInfo()
+                {
+                    Symbol = symbol,
+                    Side = BinanceOrderSide.SELL,
+                    OrigQty = baseQty,
+                    CummulativeQuoteQty = GetQuote(symbolInfo, BinanceOrderSide.SELL, baseQty, takerCommission)
+                };
+                orders.Add(order);
+            }
+            else if (ExchangeInfo.Symbols.Any(x => x.Symbol == quoteAsset + baseAsset))
+            {
+                //buy - look for asks
+                var symbol = quoteAsset + baseAsset;
+                var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
+                var order = new OrderInfo()
+                {
+                    Symbol = symbol,
+                    Side = BinanceOrderSide.BUY,
+                    OrigQty = baseQty,
+                    CummulativeQuoteQty = GetQuote(symbolInfo, BinanceOrderSide.BUY, baseQty, takerCommission)
+                };
+                orders.Add(order);
+            }
+            else if (baseAsset == "USDT")
+            {
+                //buy - look for asks
+                var symbol1 = "BTC" + baseAsset;
+                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol1);
+                var order1 = new OrderInfo()
+                {
+                    Symbol = symbol1,
+                    Side = BinanceOrderSide.BUY,
+                    OrigQty = baseQty,
+                    CummulativeQuoteQty = GetQuote(symbolInfo1, BinanceOrderSide.BUY, baseQty, takerCommission)
+                };
+                orders.Add(order1);
+
+                //buy - look for asks
+                var symbol2 = quoteAsset + "BTC";
+                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol2);
+                var order2 = new OrderInfo()
+                {
+                    Symbol = symbol2,
+                    Side = BinanceOrderSide.BUY,
+                    OrigQty = order1.CummulativeQuoteQty,
+                    CummulativeQuoteQty = GetQuote(symbolInfo2, BinanceOrderSide.BUY, order1.CummulativeQuoteQty, takerCommission)
+                };
+                orders.Add(order2);
+            }
+            else if (quoteAsset == "USDT")
+            {
+                //sell - look for bids
+                var symbol1 = baseAsset + "BTC";
+                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol1);
+                var order1 = new OrderInfo()
+                {
+                    Symbol = symbol1,
+                    Side = BinanceOrderSide.SELL,
+                    OrigQty = baseQty,
+                    CummulativeQuoteQty = GetQuote(symbolInfo1, BinanceOrderSide.SELL, baseQty, takerCommission)
+                };
+                orders.Add(order1);
+
+                //sell - look for bids
+                var symbol2 = "BTC" + quoteAsset;
+                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol2);
+                var order2 = new OrderInfo()
+                {
+                    Symbol = symbol2,
+                    Side = BinanceOrderSide.SELL,
+                    OrigQty = order1.CummulativeQuoteQty,
+                    CummulativeQuoteQty = GetQuote(symbolInfo2, BinanceOrderSide.SELL, order1.CummulativeQuoteQty, takerCommission)
+                };
+                orders.Add(order2);
+            }
+            else
+            {
+                //sell - look for bids
+                var symbol1 = baseAsset + "BTC";
+                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol1);
+                var order1 = new OrderInfo()
+                {
+                    Symbol = symbol1,
+                    Side = BinanceOrderSide.SELL,
+                    OrigQty = baseQty,
+                    CummulativeQuoteQty = GetQuote(symbolInfo1, BinanceOrderSide.SELL, baseQty, takerCommission)
+                };
+                orders.Add(order1);
+
+                //buy - look for asks
+                var symbol2 = quoteAsset + "BTC";
+                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol2);
+                var order2 = new OrderInfo()
+                {
+                    Symbol = symbol2,
+                    Side = BinanceOrderSide.BUY,
+                    OrigQty = order1.CummulativeQuoteQty,
+                    CummulativeQuoteQty = GetQuote(symbolInfo2, BinanceOrderSide.BUY, order1.CummulativeQuoteQty, takerCommission)
+                };
+                orders.Add(order2);
+            }
+
+            return orders;
+        }
+
+        public double GetQuote(string baseAsset, string quoteAsset, double baseQty, double takerCommission)
+        {
+            if (baseAsset == quoteAsset) return baseQty;
+            var orders = BuildOrders(baseAsset, quoteAsset, baseQty, takerCommission);
+            return orders.Last().CummulativeQuoteQty;
         }
 
         private SymbolOrdersInfo GetOrders(string symbol)
@@ -443,38 +468,36 @@ namespace BinanceApiAdapter
             }
         }
 
-        public OrderInfo NewOrder(SymbolInfo symbol, OrderSide side, OrderType type, TimeInForce timeInForce, double quantity, double price)
+        public OrderInfo NewMarketOrder(string symbol, string side, double quantity)
         {
             var request = new RestRequest("/api/v3/order", Method.POST, DataFormat.Json);
-            request.AddParameter("symbol", symbol.Symbol);
-            request.AddParameter("side", side.ToString());
-            request.AddParameter("type", type.ToString());
-            request.AddParameter("timeInForce", timeInForce.ToString());
+            request.AddParameter("symbol", symbol);
+            request.AddParameter("side", side);
+            request.AddParameter("type", BinanceOrderType.MARKET.ToString());
             request.AddParameter("quantity", quantity);
-            request.AddParameter("price", price);
             return ProcessRequest<OrderInfo>(request, SecurityType.USER_DATA);
         }
 
-        public OrderInfo QueryOrder(SymbolInfo symbol, string clientOrderId)
+        public OrderInfo QueryOrder(string symbol, string clientOrderId)
         {
             var request = new RestRequest("/api/v3/order", Method.GET, DataFormat.Json);
-            request.AddParameter("symbol", symbol.Symbol);
+            request.AddParameter("symbol", symbol);
             request.AddParameter("origClientOrderId", clientOrderId);
             return ProcessRequest<OrderInfo>(request, SecurityType.USER_DATA);
         }
 
-        public OrderInfo CancelOrder(SymbolInfo symbol, string clientOrderId)
+        public OrderInfo CancelOrder(string symbol, string clientOrderId)
         {
             var request = new RestRequest("/api/v3/order", Method.DELETE, DataFormat.Json);
-            request.AddParameter("symbol", symbol.Symbol);
+            request.AddParameter("symbol", symbol);
             request.AddParameter("origClientOrderId", clientOrderId);
             return ProcessRequest<OrderInfo>(request, SecurityType.USER_DATA);
         }
 
-        public List<OrderInfo> OpenOrders(SymbolInfo symbol)
+        public List<OrderInfo> OpenOrders(string symbol)
         {
             var request = new RestRequest("/api/v3/openOrders", Method.GET, DataFormat.Json);
-            request.AddParameter("symbol", symbol.Symbol);
+            request.AddParameter("symbol", symbol);
             return ProcessRequest<List<OrderInfo>>(request, SecurityType.USER_DATA);
         }
     }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BinanceApiAdapter.Enums
 {
-    public enum OrderStatus
+    public enum BinanceOrderStatus
     {
         NEW,
         PARTIALLY_FILLED,

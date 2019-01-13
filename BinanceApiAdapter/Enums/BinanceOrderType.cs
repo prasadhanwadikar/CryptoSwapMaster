@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BinanceApiAdapter.Enums
 {
-    public enum OrderType
+    public enum BinanceOrderType
     {
         LIMIT,
         MARKET,

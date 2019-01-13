@@ -13,13 +13,13 @@ namespace BinanceApiAdapter.Types
         public string QuoteAsset { get; set; }
         public int QuotePrecision { get; set; }
         public double Price { get; set; }
-        public List<OrderType> OrderTypes { get; set; }
+        public List<BinanceOrderType> OrderTypes { get; set; }
         public bool IcebergAllowed { get; set; }
         public List<Filter> Filters { get; set; }
 
         public SymbolInfo()
         {
-            OrderTypes = new List<OrderType>();
+            OrderTypes = new List<BinanceOrderType>();
             Filters = new List<Filter>();
         }
     }

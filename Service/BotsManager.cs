@@ -11,8 +11,11 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using BinanceApiAdapter.Types;
 using log4net;
 using log4net.Config;
+using Data.Enums;
+using BinanceApiAdapter.Enums;
 
 namespace BotsManagerService
 {
@@ -65,27 +68,35 @@ namespace BotsManagerService
 
                     foreach (var user in users.Where(u => u.BotStatus == BotStatus.StartRequested || u.BotStatus == BotStatus.Running))
                     {
-                        if (bots.ContainsKey(user.Id))
-                        {
-                            if (user.BotStatus == BotStatus.StartRequested) db.UpdateBotStatus(user.Id, BotStatus.Running);
-                            continue;
-                        }
-                        var bot = new Bot {User = user, CTS = new CancellationTokenSource()};
-                        bot.Task = new Task((b) => RunBot((Bot) b), bot, bot.CTS.Token, TaskCreationOptions.AttachedToParent | TaskCreationOptions.LongRunning | TaskCreationOptions.None);
-                        bot.Task.Start();
-                        bots.Add(user.Id, bot);
-                    }
-
-                    foreach (var user in users.Where(u => u.BotStatus == BotStatus.StopRequested))
-                    {
                         if (!bots.ContainsKey(user.Id))
                         {
-                            db.UpdateBotStatus(user.Id, BotStatus.Stopped);
-                            continue;
+                            var bot = new Bot
+                            {
+                                User = user,
+                                CTS = new CancellationTokenSource(),
+                                Binance = new BinanceApiClient(user.ApiKey, user.SecretKey, 30000, 5000)
+                            };
+                            bot.Observer = new Task((b) => ObserveOrders((Bot)b), bot, bot.CTS.Token, TaskCreationOptions.AttachedToParent | TaskCreationOptions.LongRunning | TaskCreationOptions.None);
+                            bot.Processor = new Task((b) => ProcessOrders((Bot)b), bot, bot.CTS.Token, TaskCreationOptions.AttachedToParent | TaskCreationOptions.LongRunning | TaskCreationOptions.None);
+                            bot.Observer.Start();
+                            bot.Processor.Start();
+                            bots.Add(user.Id, bot);
                         }
-                        bots[user.Id].CTS.Cancel();
-                        bots[user.Id].Task.Wait();
-                        bots.Remove(user.Id);
+
+                        if (user.BotStatus != BotStatus.Running) db.UpdateBotStatus(user.Id, BotStatus.Running);
+                    }
+
+                    foreach (var user in users.Where(u => u.BotStatus == BotStatus.StopRequested || u.BotStatus == BotStatus.Stopped))
+                    {
+                        if (bots.ContainsKey(user.Id))
+                        {
+                            bots[user.Id].CTS.Cancel();
+                            if (bots[user.Id].Observer != null) bots[user.Id].Observer.Wait();
+                            if (bots[user.Id].Processor != null) bots[user.Id].Processor.Wait();
+                            bots.Remove(user.Id);
+                        }
+
+                        if (user.BotStatus != BotStatus.Stopped) db.UpdateBotStatus(user.Id, BotStatus.Stopped);
                     }
                 }
             }
@@ -99,29 +110,107 @@ namespace BotsManagerService
                 {
                     bot.Value.CTS.Cancel();
                 }
-                Task.WaitAll(bots.Values.Select(x => x.Task).ToArray());
+                Task.WaitAll(bots.Values.Select(x => x.Observer).ToArray());
+                Task.WaitAll(bots.Values.Select(x => x.Processor).ToArray());
                 _logger.Info("BotsManager stopped");
             }
         }
 
-        private void RunBot(Bot b)
+        private void ObserveOrders(Bot b)
         {
             var db = new Repository();
             try
             {
-                Thread.CurrentThread.Name = "Bot" + b.User.Id;
-                var binance = new BinanceApiClient(b.User.ApiKey, b.User.SecretKey);
-
-                db.UpdateBotStatus(b.User.Id, BotStatus.Running);
-
+                Thread.CurrentThread.Name = "O" + b.User.Id;
                 _logger.Info(Thread.CurrentThread.Name + " started");
 
                 while (!b.CTS.IsCancellationRequested)
                 {
-                    var orders = db.GetOrders(b.User.Id);
-                    foreach (var order in orders)
+                    var baseAssetOrdersGroups = db.GetOrders(b.User.Id, OrderStatus.Open).GroupBy(x => x.BaseAsset);
+
+                    if (!baseAssetOrdersGroups.Any())
                     {
-                        
+                        Thread.Sleep(1000);
+                        continue;
+                    }
+
+                    var accountInfo = b.Binance.AccountInfo;
+
+                    foreach (var baseAssetOrdersGroup in baseAssetOrdersGroups)
+                    {
+                        var assetLevelOrdersQty = 0.0;
+                        var groupOrdersGroups = baseAssetOrdersGroup.GroupBy(x => x.Group);
+                        foreach (var groupOrdersGroup in groupOrdersGroups)
+                        {
+                            var groupLevelOrdersMaxQty = 0.0;
+                            var subGroupOrdersGroups = groupOrdersGroup.GroupBy(x => x.SubGroup);
+                            foreach (var subGroupOrdersGroup in subGroupOrdersGroups)
+                            {
+                                var subGroupLevelOrdersQtySum = subGroupOrdersGroup.Sum(x => x.BaseQty);
+                                if (subGroupLevelOrdersQtySum > groupLevelOrdersMaxQty) groupLevelOrdersMaxQty = subGroupLevelOrdersQtySum;
+                            }
+                            assetLevelOrdersQty += groupLevelOrdersMaxQty;
+                        }
+
+                        var baseAssetFreeQty = accountInfo.Balances.First(x => x.Asset == baseAssetOrdersGroup.Key).Free;
+                        if (baseAssetFreeQty < assetLevelOrdersQty)
+                        {
+                            db.CancelOpenBaseAssetOrders(b.User.Id, baseAssetOrdersGroup.Key);
+                            continue;
+                        }
+
+                        Parallel.ForEach(groupOrdersGroups, (groupOrdersGroup) =>
+                        {
+                            IGrouping<int, Order> selectedSubGroup = null;
+                            var subGroupOrdersGroups = groupOrdersGroup.GroupBy(x => x.SubGroup);
+                            foreach (var subGroupOrdersGroup in subGroupOrdersGroups)
+                            {
+                                var selectSubGroup = true;
+                                foreach (var order in subGroupOrdersGroup)
+                                {
+                                    var quote = b.Binance.GetQuote(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
+                                    if (quote < order.ExpectedQuoteQty)
+                                    {
+                                        selectSubGroup = false;
+                                        break;
+                                    }
+                                }
+                                if (selectSubGroup)
+                                {
+                                    selectedSubGroup = subGroupOrdersGroup;
+                                    break;
+                                }
+                            }
+
+                            if (selectedSubGroup != null)
+                            {
+                                var exchangeOrders = new List<ExchangeOrder>();
+
+                                foreach (var order in selectedSubGroup)
+                                {
+                                    var orderParts = b.Binance.BuildOrders(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
+                                    var i = 1;
+                                    foreach (var orderPart in orderParts)
+                                    {
+                                        var exchangeOrder = new ExchangeOrder
+                                        {
+                                            OrderId = order.Id,
+                                            Sequence = i,
+                                            Symbol = orderPart.Symbol,
+                                            Side = orderPart.Side.ToString(),
+                                            BaseQty = orderPart.OrigQty,
+                                            Status = OrderStatus.Open,
+                                            Created = DateTime.Now
+                                        };
+                                        exchangeOrders.Add(exchangeOrder);
+                                        i++;
+                                    }
+                                }
+
+                                db.SaveExchangeOrders(exchangeOrders);
+                                db.MarkSubGroupOrdersInProcess(b.User.Id, selectedSubGroup.First().BaseAsset, selectedSubGroup.First().Group, selectedSubGroup.First().SubGroup);
+                            }
+                        });
                     }
                 }
 
@@ -132,7 +221,91 @@ namespace BotsManagerService
                 try
                 {
                     _logger.Error("Error: " + ex.Message, ex);
-                    db.UpdateBotStatus(b.User.Id, BotStatus.Stopped, ex.Message);
+                    db.UpdateBotStatus(b.User.Id, BotStatus.Stopped, "Stopped due to error");
+                }
+                catch (Exception ex2)
+                {
+                    _logger.Error("Failed to update bot status because of error: " + ex2.Message, ex2);
+                }
+            }
+            finally
+            {
+                _logger.Info(Thread.CurrentThread.Name + " stopped");
+            }
+        }
+
+        private void ProcessOrders(Bot b)
+        {
+            var db = new Repository();
+            try
+            {
+                Thread.CurrentThread.Name = "P" + b.User.Id;
+                _logger.Info(Thread.CurrentThread.Name + " started");
+
+                while (!b.CTS.IsCancellationRequested)
+                {
+                    var orders = db.GetOrders(b.User.Id, OrderStatus.InProcess);
+
+                    if (!orders.Any())
+                    {
+                        Thread.Sleep(1000);
+                        continue;
+                    }
+
+                    var accountInfo = b.Binance.AccountInfo;
+
+                    Parallel.ForEach(orders, (order) =>
+                    {
+                        foreach (var exchangeOrder in order.ExchangeOrders.OrderBy(x => x.Sequence)) //check EF navigation prop attrs
+                        {
+                            var binanceOrderInfo = new OrderInfo { Status = BinanceOrderStatus.NEW };
+                            try
+                            {
+                                if (exchangeOrder.Status == OrderStatus.Open)
+                                {
+                                    binanceOrderInfo = b.Binance.NewMarketOrder(exchangeOrder.Symbol, exchangeOrder.Side, exchangeOrder.BaseQty);
+                                    exchangeOrder.ExchangeOrderId = binanceOrderInfo.ClientOrderId;
+                                    exchangeOrder.Status = OrderStatus.InProcess;
+                                    exchangeOrder.StatusMsg = null;
+                                }
+                                else
+                                {
+                                    binanceOrderInfo = b.Binance.QueryOrder(exchangeOrder.Symbol, exchangeOrder.ExchangeOrderId);
+                                }
+                            }
+                            catch (BinanceException bex)
+                            {
+                                if (exchangeOrder.Status == OrderStatus.Open) exchangeOrder.Status = OrderStatus.Cancelled;
+                                exchangeOrder.StatusMsg = bex.Msg;
+                            }
+
+                            if (binanceOrderInfo.Status == BinanceOrderStatus.FILLED)
+                            {
+                                exchangeOrder.QuoteQty = binanceOrderInfo.CummulativeQuoteQty;
+                                exchangeOrder.Status = OrderStatus.Completed;
+                                exchangeOrder.StatusMsg = null;
+                            }
+                            else if (binanceOrderInfo.Status == (BinanceOrderStatus.CANCELED | BinanceOrderStatus.EXPIRED | BinanceOrderStatus.REJECTED))
+                            {
+                                exchangeOrder.Status = OrderStatus.Cancelled;
+                                exchangeOrder.StatusMsg = binanceOrderInfo.Status.ToString() + " by Binance";
+                            }
+
+                            db.UpdateExchangeOrder(exchangeOrder);
+
+                            if (binanceOrderInfo.Status != BinanceOrderStatus.FILLED) break;
+                        }
+                    });
+                }
+
+                db.UpdateBotStatus(b.User.Id, BotStatus.Stopped);
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    _logger.Error("Error: " + ex.Message, ex);
+                    db.UpdateBotStatus(b.User.Id, BotStatus.Stopped, "Stopped due to error");
                 }
                 catch (Exception ex2)
                 {
