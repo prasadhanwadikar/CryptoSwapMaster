@@ -29,6 +29,7 @@ namespace Data.Entities
         [Required]
         public string Side { get; set; }
 
+        [Required]
         public double BaseQty { get; set; }
 
         public double? QuoteQty { get; set; }

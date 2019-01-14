@@ -256,7 +256,7 @@ namespace BotsManagerService
 
                     Parallel.ForEach(orders, (order) =>
                     {
-                        foreach (var exchangeOrder in order.ExchangeOrders.OrderBy(x => x.Sequence)) //check EF navigation prop attrs
+                        foreach (var exchangeOrder in order.ExchangeOrders.OrderBy(x => x.Sequence))
                         {
                             var binanceOrderInfo = new OrderInfo { Status = BinanceOrderStatus.NEW };
                             try

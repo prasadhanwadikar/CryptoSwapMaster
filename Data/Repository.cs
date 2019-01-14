@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.Entity.Migrations.Sql;
 using System.Linq;
 using System.Text;
@@ -104,7 +105,7 @@ namespace Data
         {
             using (var context = new Context())
             {
-                return context.Orders.Include("ExchangeOrders").Where(x => x.UserId == userId && x.Status == orderStatus).ToList();
+                return context.Orders.Include(x => x.ExchangeOrders).Where(x => x.UserId == userId && x.Status == orderStatus).ToList();
             }
         }
 
@@ -175,7 +176,7 @@ namespace Data
         {
             using (var context = new Context())
             {
-                var order = context.Orders.Include("ExchangeOrders").FirstOrDefault(x => x.Id == exchangeOrder.OrderId);
+                var order = context.Orders.Include(x => x.ExchangeOrders).FirstOrDefault(x => x.Id == exchangeOrder.OrderId);
                 var dbExchangeOrder = order.ExchangeOrders.First(x => x.Sequence == exchangeOrder.Sequence);
                 
                 dbExchangeOrder.ExchangeOrderId = exchangeOrder.ExchangeOrderId;
