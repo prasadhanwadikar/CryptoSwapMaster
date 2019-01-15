@@ -20,10 +20,10 @@ namespace Data.Entities
         public int UserId { get; set; }
 
         [Required]
-        public int Group { get; set; }
+        public int Pool { get; set; }
 
         [Required]
-        public int SubGroup { get; set; }
+        public int Group { get; set; }
 
         [Required]
         public string BaseAsset { get; set; }

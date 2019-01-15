@@ -109,12 +109,12 @@ namespace Data
             }
         }
 
-        public void CancelOpenBaseAssetOrders(int userId, string baseAsset)
+        public void CancelOpenOrders(int userId, string baseAsset)
         {
             using (var context = new Context())
             {
-                var baseAssetOrders = context.Orders.Where(x => x.UserId == userId && x.Status == OrderStatus.Open && x.BaseAsset == baseAsset);
-                foreach (var order in baseAssetOrders)
+                var orders = context.Orders.Where(x => x.UserId == userId && x.Status == OrderStatus.Open && x.BaseAsset == baseAsset);
+                foreach (var order in orders)
                 {
                     order.Status = OrderStatus.Cancelled;
                     order.StatusMsg = "Base asset free balance found insufficient for the specified groups of orders";
@@ -125,14 +125,14 @@ namespace Data
             }
         }
 
-        public void MarkSubGroupOrdersInProcess(int userId, string baseAsset, int group, int subGroup)
+        public void MarkGroupOrdersInProcess(int userId, string baseAsset, int pool, int group)
         {
             using (var context = new Context())
             {
-                var groupLevelOrders = context.Orders.Where(x => x.UserId == userId && x.Status == OrderStatus.Open && x.BaseAsset == baseAsset && x.Group == group);
-                foreach (var order in groupLevelOrders)
+                var poolOrders = context.Orders.Where(x => x.UserId == userId && x.Status == OrderStatus.Open && x.BaseAsset == baseAsset && x.Pool == pool);
+                foreach (var order in poolOrders)
                 {
-                    if (order.SubGroup == subGroup)
+                    if (order.Group == group)
                     {
                         order.Status = OrderStatus.InProcess;
                     }

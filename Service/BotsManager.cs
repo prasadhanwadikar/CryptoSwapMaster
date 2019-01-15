@@ -139,15 +139,15 @@ namespace BotsManagerService
                     foreach (var baseAssetOrdersGroup in baseAssetOrdersGroups)
                     {
                         var assetLevelOrdersQty = 0.0;
-                        var groupOrdersGroups = baseAssetOrdersGroup.GroupBy(x => x.Group);
-                        foreach (var groupOrdersGroup in groupOrdersGroups)
+                        var poolOrdersGroups = baseAssetOrdersGroup.GroupBy(x => x.Pool);
+                        foreach (var poolOrdersGroup in poolOrdersGroups)
                         {
                             var groupLevelOrdersMaxQty = 0.0;
-                            var subGroupOrdersGroups = groupOrdersGroup.GroupBy(x => x.SubGroup);
-                            foreach (var subGroupOrdersGroup in subGroupOrdersGroups)
+                            var groupOrdersGroups = poolOrdersGroup.GroupBy(x => x.Group);
+                            foreach (var groupOrdersGroup in groupOrdersGroups)
                             {
-                                var subGroupLevelOrdersQtySum = subGroupOrdersGroup.Sum(x => x.BaseQty);
-                                if (subGroupLevelOrdersQtySum > groupLevelOrdersMaxQty) groupLevelOrdersMaxQty = subGroupLevelOrdersQtySum;
+                                var groupLevelOrdersQtySum = groupOrdersGroup.Sum(x => x.BaseQty);
+                                if (groupLevelOrdersQtySum > groupLevelOrdersMaxQty) groupLevelOrdersMaxQty = groupLevelOrdersQtySum;
                             }
                             assetLevelOrdersQty += groupLevelOrdersMaxQty;
                         }
@@ -155,38 +155,38 @@ namespace BotsManagerService
                         var baseAssetFreeQty = accountInfo.Balances.First(x => x.Asset == baseAssetOrdersGroup.Key).Free;
                         if (baseAssetFreeQty < assetLevelOrdersQty)
                         {
-                            db.CancelOpenBaseAssetOrders(b.User.Id, baseAssetOrdersGroup.Key);
+                            db.CancelOpenOrders(b.User.Id, baseAssetOrdersGroup.Key);
                             continue;
                         }
 
-                        Parallel.ForEach(groupOrdersGroups, (groupOrdersGroup) =>
+                        Parallel.ForEach(poolOrdersGroups, (poolOrdersGroup) =>
                         {
-                            IGrouping<int, Order> selectedSubGroup = null;
-                            var subGroupOrdersGroups = groupOrdersGroup.GroupBy(x => x.SubGroup);
-                            foreach (var subGroupOrdersGroup in subGroupOrdersGroups)
+                            IGrouping<int, Order> selectedGroup = null;
+                            var groupOrdersGroups = poolOrdersGroup.GroupBy(x => x.Group);
+                            foreach (var groupOrdersGroup in groupOrdersGroups)
                             {
-                                var selectSubGroup = true;
-                                foreach (var order in subGroupOrdersGroup)
+                                var selectGroup = true;
+                                foreach (var order in groupOrdersGroup)
                                 {
                                     var quote = b.Binance.GetQuote(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
                                     if (quote < order.ExpectedQuoteQty)
                                     {
-                                        selectSubGroup = false;
+                                        selectGroup = false;
                                         break;
                                     }
                                 }
-                                if (selectSubGroup)
+                                if (selectGroup)
                                 {
-                                    selectedSubGroup = subGroupOrdersGroup;
+                                    selectedGroup = groupOrdersGroup;
                                     break;
                                 }
                             }
 
-                            if (selectedSubGroup != null)
+                            if (selectedGroup != null)
                             {
                                 var exchangeOrders = new List<ExchangeOrder>();
 
-                                foreach (var order in selectedSubGroup)
+                                foreach (var order in selectedGroup)
                                 {
                                     var orderParts = b.Binance.BuildOrders(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
                                     var i = 1;
@@ -208,7 +208,7 @@ namespace BotsManagerService
                                 }
 
                                 db.SaveExchangeOrders(exchangeOrders);
-                                db.MarkSubGroupOrdersInProcess(b.User.Id, selectedSubGroup.First().BaseAsset, selectedSubGroup.First().Group, selectedSubGroup.First().SubGroup);
+                                db.MarkGroupOrdersInProcess(b.User.Id, selectedGroup.First().BaseAsset, selectedGroup.First().Pool, selectedGroup.First().Group);
                             }
                         });
                     }
