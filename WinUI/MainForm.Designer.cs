@@ -32,7 +32,23 @@
             this.tpDashboard = new System.Windows.Forms.TabPage();
             this.splitDashboard = new System.Windows.Forms.SplitContainer();
             this.dgBalance = new System.Windows.Forms.DataGridView();
-            this.label1 = new System.Windows.Forms.Label();
+            this.pnlOpenOrders = new System.Windows.Forms.Panel();
+            this.tableOpenOrders = new System.Windows.Forms.TableLayoutPanel();
+            this.cbPool = new System.Windows.Forms.ComboBox();
+            this.tbQuoteQty = new System.Windows.Forms.TextBox();
+            this.cbGroup = new System.Windows.Forms.ComboBox();
+            this.lblAction = new System.Windows.Forms.Label();
+            this.lblQuoteQty = new System.Windows.Forms.Label();
+            this.lblGroup = new System.Windows.Forms.Label();
+            this.lblPool = new System.Windows.Forms.Label();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.lblQuoteAsset = new System.Windows.Forms.Label();
+            this.lblBaseAsset = new System.Windows.Forms.Label();
+            this.cbQuoteAsset = new System.Windows.Forms.ComboBox();
+            this.tbBaseQty = new System.Windows.Forms.TextBox();
+            this.pnlStatusBar = new System.Windows.Forms.Panel();
+            this.pnlBaseAssetInfo = new System.Windows.Forms.Panel();
+            this.lblOpenOrders = new System.Windows.Forms.Label();
             this.tpOrdersHistory = new System.Windows.Forms.TabPage();
             this.tpSettings = new System.Windows.Forms.TabPage();
             this.lblIPValue = new System.Windows.Forms.Label();
@@ -54,6 +70,9 @@
             this.splitDashboard.Panel2.SuspendLayout();
             this.splitDashboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgBalance)).BeginInit();
+            this.pnlOpenOrders.SuspendLayout();
+            this.tableOpenOrders.SuspendLayout();
+            this.pnlBaseAssetInfo.SuspendLayout();
             this.tpSettings.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -98,9 +117,10 @@
             // 
             // splitDashboard.Panel2
             // 
-            this.splitDashboard.Panel2.Controls.Add(this.label1);
+            this.splitDashboard.Panel2.Controls.Add(this.pnlOpenOrders);
+            this.splitDashboard.Panel2.Controls.Add(this.pnlBaseAssetInfo);
             this.splitDashboard.Size = new System.Drawing.Size(1223, 601);
-            this.splitDashboard.SplitterDistance = 215;
+            this.splitDashboard.SplitterDistance = 100;
             this.splitDashboard.SplitterWidth = 1;
             this.splitDashboard.TabIndex = 10;
             // 
@@ -116,19 +136,205 @@
             this.dgBalance.Name = "dgBalance";
             this.dgBalance.ReadOnly = true;
             this.dgBalance.RowTemplate.Height = 28;
-            this.dgBalance.Size = new System.Drawing.Size(1221, 213);
+            this.dgBalance.Size = new System.Drawing.Size(1221, 98);
             this.dgBalance.TabIndex = 7;
             // 
-            // label1
+            // pnlOpenOrders
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(136, 123);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(860, 46);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Open Orders for selected asset from above grid";
+            this.pnlOpenOrders.Controls.Add(this.tableOpenOrders);
+            this.pnlOpenOrders.Controls.Add(this.pnlStatusBar);
+            this.pnlOpenOrders.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlOpenOrders.Location = new System.Drawing.Point(0, 33);
+            this.pnlOpenOrders.Name = "pnlOpenOrders";
+            this.pnlOpenOrders.Size = new System.Drawing.Size(1221, 465);
+            this.pnlOpenOrders.TabIndex = 5;
+            // 
+            // tableOpenOrders
+            // 
+            this.tableOpenOrders.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
+            this.tableOpenOrders.ColumnCount = 6;
+            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12F));
+            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12F));
+            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22F));
+            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22F));
+            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12F));
+            this.tableOpenOrders.Controls.Add(this.cbPool, 0, 1);
+            this.tableOpenOrders.Controls.Add(this.tbQuoteQty, 4, 1);
+            this.tableOpenOrders.Controls.Add(this.cbGroup, 1, 1);
+            this.tableOpenOrders.Controls.Add(this.lblAction, 5, 0);
+            this.tableOpenOrders.Controls.Add(this.lblQuoteQty, 4, 0);
+            this.tableOpenOrders.Controls.Add(this.lblGroup, 1, 0);
+            this.tableOpenOrders.Controls.Add(this.lblPool, 0, 0);
+            this.tableOpenOrders.Controls.Add(this.btnAdd, 5, 1);
+            this.tableOpenOrders.Controls.Add(this.lblQuoteAsset, 2, 0);
+            this.tableOpenOrders.Controls.Add(this.lblBaseAsset, 3, 0);
+            this.tableOpenOrders.Controls.Add(this.cbQuoteAsset, 2, 1);
+            this.tableOpenOrders.Controls.Add(this.tbBaseQty, 3, 1);
+            this.tableOpenOrders.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableOpenOrders.Location = new System.Drawing.Point(0, 0);
+            this.tableOpenOrders.Name = "tableOpenOrders";
+            this.tableOpenOrders.RowCount = 3;
+            this.tableOpenOrders.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableOpenOrders.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableOpenOrders.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableOpenOrders.Size = new System.Drawing.Size(1221, 422);
+            this.tableOpenOrders.TabIndex = 6;
+            // 
+            // cbPool
+            // 
+            this.cbPool.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cbPool.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbPool.FormattingEnabled = true;
+            this.cbPool.Location = new System.Drawing.Point(13, 48);
+            this.cbPool.Name = "cbPool";
+            this.cbPool.Size = new System.Drawing.Size(121, 33);
+            this.cbPool.TabIndex = 12;
+            this.cbPool.SelectedIndexChanged += new System.EventHandler(this.cbPool_SelectedIndexChanged);
+            // 
+            // tbQuoteQty
+            // 
+            this.tbQuoteQty.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tbQuoteQty.Location = new System.Drawing.Point(831, 47);
+            this.tbQuoteQty.Name = "tbQuoteQty";
+            this.tbQuoteQty.Size = new System.Drawing.Size(213, 30);
+            this.tbQuoteQty.TabIndex = 10;
+            this.tbQuoteQty.Leave += new System.EventHandler(this.tbQuoteQty_Leave);
+            // 
+            // cbGroup
+            // 
+            this.cbGroup.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cbGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbGroup.FormattingEnabled = true;
+            this.cbGroup.Location = new System.Drawing.Point(159, 48);
+            this.cbGroup.Name = "cbGroup";
+            this.cbGroup.Size = new System.Drawing.Size(121, 33);
+            this.cbGroup.TabIndex = 7;
+            this.cbGroup.SelectedIndexChanged += new System.EventHandler(this.cbGroup_SelectedIndexChanged);
+            // 
+            // lblAction
+            // 
+            this.lblAction.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblAction.AutoSize = true;
+            this.lblAction.Location = new System.Drawing.Point(1112, 8);
+            this.lblAction.Name = "lblAction";
+            this.lblAction.Size = new System.Drawing.Size(67, 25);
+            this.lblAction.TabIndex = 5;
+            this.lblAction.Text = "Action";
+            this.lblAction.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblQuoteQty
+            // 
+            this.lblQuoteQty.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblQuoteQty.AutoSize = true;
+            this.lblQuoteQty.Location = new System.Drawing.Point(886, 8);
+            this.lblQuoteQty.Name = "lblQuoteQty";
+            this.lblQuoteQty.Size = new System.Drawing.Size(102, 25);
+            this.lblQuoteQty.TabIndex = 4;
+            this.lblQuoteQty.Text = "Quote Qty";
+            this.lblQuoteQty.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblGroup
+            // 
+            this.lblGroup.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblGroup.AutoSize = true;
+            this.lblGroup.Location = new System.Drawing.Point(186, 8);
+            this.lblGroup.Name = "lblGroup";
+            this.lblGroup.Size = new System.Drawing.Size(66, 25);
+            this.lblGroup.TabIndex = 1;
+            this.lblGroup.Text = "Group";
+            this.lblGroup.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblPool
+            // 
+            this.lblPool.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblPool.AutoSize = true;
+            this.lblPool.Location = new System.Drawing.Point(48, 8);
+            this.lblPool.Name = "lblPool";
+            this.lblPool.Size = new System.Drawing.Size(51, 25);
+            this.lblPool.TabIndex = 0;
+            this.lblPool.Text = "Pool";
+            this.lblPool.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // btnAdd
+            // 
+            this.btnAdd.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnAdd.Location = new System.Drawing.Point(1128, 46);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(36, 31);
+            this.btnAdd.TabIndex = 11;
+            this.btnAdd.Text = "+";
+            this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
+            // lblQuoteAsset
+            // 
+            this.lblQuoteAsset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblQuoteAsset.AutoSize = true;
+            this.lblQuoteAsset.Location = new System.Drawing.Point(366, 8);
+            this.lblQuoteAsset.Name = "lblQuoteAsset";
+            this.lblQuoteAsset.Size = new System.Drawing.Size(121, 25);
+            this.lblQuoteAsset.TabIndex = 3;
+            this.lblQuoteAsset.Text = "Quote Asset";
+            this.lblQuoteAsset.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblBaseAsset
+            // 
+            this.lblBaseAsset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblBaseAsset.AutoSize = true;
+            this.lblBaseAsset.Location = new System.Drawing.Point(635, 8);
+            this.lblBaseAsset.Name = "lblBaseAsset";
+            this.lblBaseAsset.Size = new System.Drawing.Size(93, 25);
+            this.lblBaseAsset.TabIndex = 2;
+            this.lblBaseAsset.Text = "Base Qty";
+            this.lblBaseAsset.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // cbQuoteAsset
+            // 
+            this.cbQuoteAsset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cbQuoteAsset.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbQuoteAsset.FormattingEnabled = true;
+            this.cbQuoteAsset.Location = new System.Drawing.Point(326, 48);
+            this.cbQuoteAsset.Name = "cbQuoteAsset";
+            this.cbQuoteAsset.Size = new System.Drawing.Size(200, 33);
+            this.cbQuoteAsset.TabIndex = 8;
+            this.cbQuoteAsset.SelectedIndexChanged += new System.EventHandler(this.cbQuoteAsset_SelectedIndexChanged);
+            // 
+            // tbBaseQty
+            // 
+            this.tbBaseQty.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tbBaseQty.Location = new System.Drawing.Point(575, 47);
+            this.tbBaseQty.Name = "tbBaseQty";
+            this.tbBaseQty.Size = new System.Drawing.Size(213, 30);
+            this.tbBaseQty.TabIndex = 9;
+            this.tbBaseQty.Leave += new System.EventHandler(this.tbBaseQty_Leave);
+            // 
+            // pnlStatusBar
+            // 
+            this.pnlStatusBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlStatusBar.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlStatusBar.Location = new System.Drawing.Point(0, 422);
+            this.pnlStatusBar.Name = "pnlStatusBar";
+            this.pnlStatusBar.Size = new System.Drawing.Size(1221, 43);
+            this.pnlStatusBar.TabIndex = 5;
+            // 
+            // pnlBaseAssetInfo
+            // 
+            this.pnlBaseAssetInfo.Controls.Add(this.lblOpenOrders);
+            this.pnlBaseAssetInfo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlBaseAssetInfo.Location = new System.Drawing.Point(0, 0);
+            this.pnlBaseAssetInfo.Name = "pnlBaseAssetInfo";
+            this.pnlBaseAssetInfo.Size = new System.Drawing.Size(1221, 33);
+            this.pnlBaseAssetInfo.TabIndex = 4;
+            // 
+            // lblOpenOrders
+            // 
+            this.lblOpenOrders.AutoSize = true;
+            this.lblOpenOrders.Location = new System.Drawing.Point(8, 6);
+            this.lblOpenOrders.Name = "lblOpenOrders";
+            this.lblOpenOrders.Size = new System.Drawing.Size(132, 25);
+            this.lblOpenOrders.TabIndex = 2;
+            this.lblOpenOrders.Text = "Open Orders:";
             // 
             // tpOrdersHistory
             // 
@@ -301,10 +507,14 @@
             this.tpDashboard.ResumeLayout(false);
             this.splitDashboard.Panel1.ResumeLayout(false);
             this.splitDashboard.Panel2.ResumeLayout(false);
-            this.splitDashboard.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitDashboard)).EndInit();
             this.splitDashboard.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgBalance)).EndInit();
+            this.pnlOpenOrders.ResumeLayout(false);
+            this.tableOpenOrders.ResumeLayout(false);
+            this.tableOpenOrders.PerformLayout();
+            this.pnlBaseAssetInfo.ResumeLayout(false);
+            this.pnlBaseAssetInfo.PerformLayout();
             this.tpSettings.ResumeLayout(false);
             this.tpSettings.PerformLayout();
             this.ResumeLayout(false);
@@ -319,7 +529,6 @@
         private System.Windows.Forms.TabPage tpSettings;
         private System.Windows.Forms.SplitContainer splitDashboard;
         private System.Windows.Forms.DataGridView dgBalance;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblQuoteAssets;
         private System.Windows.Forms.Button btnCancelSettings;
         private System.Windows.Forms.Button btnSaveSettings;
@@ -332,5 +541,22 @@
         private System.Windows.Forms.CheckedListBox clbQuoteAssets;
         private System.Windows.Forms.Label lblIPValue;
         private System.Windows.Forms.Label lblIP;
+        private System.Windows.Forms.Panel pnlOpenOrders;
+        private System.Windows.Forms.Panel pnlBaseAssetInfo;
+        private System.Windows.Forms.Panel pnlStatusBar;
+        private System.Windows.Forms.TableLayoutPanel tableOpenOrders;
+        private System.Windows.Forms.Label lblOpenOrders;
+        private System.Windows.Forms.Label lblPool;
+        private System.Windows.Forms.Label lblAction;
+        private System.Windows.Forms.Label lblQuoteQty;
+        private System.Windows.Forms.Label lblQuoteAsset;
+        private System.Windows.Forms.Label lblBaseAsset;
+        private System.Windows.Forms.Label lblGroup;
+        private System.Windows.Forms.ComboBox cbPool;
+        private System.Windows.Forms.TextBox tbQuoteQty;
+        private System.Windows.Forms.ComboBox cbGroup;
+        private System.Windows.Forms.ComboBox cbQuoteAsset;
+        private System.Windows.Forms.TextBox tbBaseQty;
+        private System.Windows.Forms.Button btnAdd;
     }
 }

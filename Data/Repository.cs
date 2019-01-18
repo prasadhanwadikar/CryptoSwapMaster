@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Migrations.Sql;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
@@ -106,6 +107,61 @@ namespace Data
             using (var context = new Context())
             {
                 return context.Orders.Include(x => x.ExchangeOrders).Where(x => x.UserId == userId && x.Status == orderStatus).ToList();
+            }
+        }
+
+        public void AddOrder(int userId, string baseAsset, int pool, int group, double baseQty, string quoteAsset, double quoteQty)
+        {
+            using (var context = new Context())
+            {
+                if (pool == 0)
+                {
+                    var baseAssetOrders = context.Orders.Where(x => x.UserId == userId && x.BaseAsset == baseAsset);
+                    if (baseAssetOrders.Any()) pool = baseAssetOrders.Max(x => x.Pool) + 1;
+                    else pool = 1;
+                }
+
+                if (group == 0)
+                {
+                    var poolOrders = context.Orders.Where(x => x.UserId == userId && x.BaseAsset == baseAsset && x.Pool == pool);
+                    if (poolOrders.Any()) group = poolOrders.Max(x => x.Group) + 1;
+                    else group = 1;
+                }
+
+                var order = new Order
+                {
+                    UserId = userId,
+                    BaseAsset = baseAsset,
+                    Pool = pool,
+                    Group = group,
+                    BaseQty = baseQty,
+                    QuoteAsset = quoteAsset,
+                    ExpectedQuoteQty = quoteQty,
+                    Status = OrderStatus.Open,
+                    Created = DateTime.Now
+                };
+
+                var anyPoolOrderInProcess = context.Orders.Any(x => x.UserId == userId
+                                                                    && x.BaseAsset == baseAsset
+                                                                    && x.Pool == pool
+                                                                    && x.Status != OrderStatus.Open);
+                if (anyPoolOrderInProcess) throw new Exception("Failed to add as other order from same pool is in process");
+
+                context.Orders.Add(order);
+                context.SaveChanges();
+            }
+        }
+
+        public void CancelOrder(int orderId, string msg)
+        {
+            using (var context = new Context())
+            {
+                var order = context.Orders.Include(x => x.ExchangeOrders).FirstOrDefault(x => x.Id == orderId);
+                if (order.ExchangeOrders.Any()) throw new Exception("Order already in process and can't be cancelled");
+                order.Status = OrderStatus.Cancelled;
+                order.StatusMsg = msg;
+                order.LastModified = DateTime.Now;
+                context.SaveChanges();
             }
         }
 

@@ -138,27 +138,16 @@ namespace BotsManagerService
 
                     foreach (var baseAssetOrdersGroup in baseAssetOrdersGroups)
                     {
-                        var assetLevelOrdersQty = 0.0;
-                        var poolOrdersGroups = baseAssetOrdersGroup.GroupBy(x => x.Pool);
-                        foreach (var poolOrdersGroup in poolOrdersGroups)
-                        {
-                            var groupLevelOrdersMaxQty = 0.0;
-                            var groupOrdersGroups = poolOrdersGroup.GroupBy(x => x.Group);
-                            foreach (var groupOrdersGroup in groupOrdersGroups)
-                            {
-                                var groupLevelOrdersQtySum = groupOrdersGroup.Sum(x => x.BaseQty);
-                                if (groupLevelOrdersQtySum > groupLevelOrdersMaxQty) groupLevelOrdersMaxQty = groupLevelOrdersQtySum;
-                            }
-                            assetLevelOrdersQty += groupLevelOrdersMaxQty;
-                        }
-
-                        var baseAssetFreeQty = accountInfo.Balances.First(x => x.Asset == baseAssetOrdersGroup.Key).Free;
-                        if (baseAssetFreeQty < assetLevelOrdersQty)
+                        var assetPoolsSum = baseAssetOrdersGroup.GroupBy(x => x.Pool)
+                            .Sum(x => x.GroupBy(y => y.Group).Max(y => y.Sum(z => z.BaseQty)));
+                        var assetFreeQty = accountInfo.Balances.First(x => x.Asset == baseAssetOrdersGroup.Key).Free;
+                        if (assetFreeQty < assetPoolsSum)
                         {
                             db.CancelOpenOrders(b.User.Id, baseAssetOrdersGroup.Key);
                             continue;
                         }
 
+                        var poolOrdersGroups = baseAssetOrdersGroup.GroupBy(x => x.Pool);
                         Parallel.ForEach(poolOrdersGroups, (poolOrdersGroup) =>
                         {
                             IGrouping<int, Order> selectedGroup = null;

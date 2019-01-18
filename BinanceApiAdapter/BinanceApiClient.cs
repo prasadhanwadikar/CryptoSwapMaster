@@ -222,21 +222,21 @@ namespace BinanceApiAdapter
             ProcessRequest<EmptyResponse>(request, SecurityType.USER_STREAM);
         }
 
-        public bool IsInsufficientFreeBalance(Balance balance)
+        public bool IsInsufficientQty(string asset, double qty)
         {
             double quoteQty;
             double baseQty;
-            var symbol = balance.Asset == "USDT" || balance.Asset == "BTC" ? "BTCUSDT" : balance.Asset + "BTC";
+            var symbol = asset == "USDT" || asset == "BTC" ? "BTCUSDT" : asset + "BTC";
 
-            if (balance.Asset == "USDT")
+            if (asset == "USDT")
             {
-                baseQty = balance.Free / GetPrice(symbol);
-                quoteQty = balance.Free;
+                baseQty = qty / GetPrice(symbol);
+                quoteQty = qty;
             }
             else
             {
-                baseQty = balance.Free;
-                quoteQty = balance.Free * GetPrice(symbol);
+                baseQty = qty;
+                quoteQty = qty * GetPrice(symbol);
             }
 
             var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
