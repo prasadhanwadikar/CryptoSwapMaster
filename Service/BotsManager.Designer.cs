@@ -1,4 +1,4 @@
-﻿namespace BotsManagerService
+﻿namespace CryptoSwapMaster.Service
 {
     partial class BotsManager
     {

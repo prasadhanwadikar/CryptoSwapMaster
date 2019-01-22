@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using BinanceApiAdapter.Enums;
+using CryptoSwapMaster.BinanceApiAdapter.Enums;
 using Newtonsoft.Json;
 
-namespace BinanceApiAdapter.Types
+namespace CryptoSwapMaster.BinanceApiAdapter.Types
 {
     public class OrderInfo
     {

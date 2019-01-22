@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinanceApiAdapter", "BinanceApiAdapter\BinanceApiAdapter.csproj", "{1F687F75-549F-44FA-B9B1-91CEDFA1ACC1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoSwapMaster.BinanceApiAdapter", "BinanceApiAdapter\CryptoSwapMaster.BinanceApiAdapter.csproj", "{1F687F75-549F-44FA-B9B1-91CEDFA1ACC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinUI", "WinUI\WinUI.csproj", "{CB8A420B-6744-44BB-AC1B-E982E9DC7877}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoSwapMaster.WinUI", "WinUI\CryptoSwapMaster.WinUI.csproj", "{CB8A420B-6744-44BB-AC1B-E982E9DC7877}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{AF6D1DCF-1F78-4745-9ABE-325D92F5432B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoSwapMaster.Data", "Data\CryptoSwapMaster.Data.csproj", "{AF6D1DCF-1F78-4745-9ABE-325D92F5432B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{2CF6FA72-DC9D-4840-8E9F-450BC9929BE8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoSwapMaster.Service", "Service\CryptoSwapMaster.Service.csproj", "{2CF6FA72-DC9D-4840-8E9F-450BC9929BE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -11,14 +11,14 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BinanceApiAdapter.Enums;
-using BinanceApiAdapter.Types;
+using CryptoSwapMaster.BinanceApiAdapter.Enums;
+using CryptoSwapMaster.BinanceApiAdapter.Types;
 using Newtonsoft.Json.Converters;
 using RestSharp;
 using RestSharp.Deserializers;
 using WebSocketSharp;
 
-namespace BinanceApiAdapter
+namespace CryptoSwapMaster.BinanceApiAdapter
 {
     public class BinanceApiClient
     {

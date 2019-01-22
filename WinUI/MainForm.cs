@@ -10,14 +10,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
-using BinanceApiAdapter;
-using BinanceApiAdapter.Enums;
-using BinanceApiAdapter.Types;
-using Data;
-using Data.Entities;
-using Data.Enums;
+using CryptoSwapMaster.BinanceApiAdapter;
+using CryptoSwapMaster.BinanceApiAdapter.Enums;
+using CryptoSwapMaster.BinanceApiAdapter.Types;
+using CryptoSwapMaster.Data;
+using CryptoSwapMaster.Data.Entities;
+using CryptoSwapMaster.Data.Enums;
 
-namespace UI
+namespace CryptoSwapMaster.WinUI
 {
     public partial class MainForm : Form
     {

@@ -5,7 +5,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BotsManagerService
+namespace CryptoSwapMaster.Service
 {
     static class Program
     {

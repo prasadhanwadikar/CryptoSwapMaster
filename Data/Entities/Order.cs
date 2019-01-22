@@ -6,9 +6,9 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
-using Data.Enums;
+using CryptoSwapMaster.Data.Enums;
 
-namespace Data.Entities
+namespace CryptoSwapMaster.Data.Entities
 {
     [Table("Orders")]
     public class Order

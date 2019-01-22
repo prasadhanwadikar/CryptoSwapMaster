@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BinanceApiAdapter.Enums
+namespace CryptoSwapMaster.BinanceApiAdapter.Enums
 {
     public enum RateLimitType
     {

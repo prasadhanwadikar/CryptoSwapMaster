@@ -1,4 +1,4 @@
-﻿using Data.Enums;
+﻿using CryptoSwapMaster.Data.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Data.Entities
+namespace CryptoSwapMaster.Data.Entities
 {
     [Table("Users")]
     public class User

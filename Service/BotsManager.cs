@@ -1,6 +1,6 @@
-﻿using BinanceApiAdapter;
-using Data;
-using Data.Entities;
+﻿using CryptoSwapMaster.BinanceApiAdapter;
+using CryptoSwapMaster.Data;
+using CryptoSwapMaster.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,13 +11,13 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BinanceApiAdapter.Types;
+using CryptoSwapMaster.BinanceApiAdapter.Types;
 using log4net;
 using log4net.Config;
-using Data.Enums;
-using BinanceApiAdapter.Enums;
+using CryptoSwapMaster.Data.Enums;
+using CryptoSwapMaster.BinanceApiAdapter.Enums;
 
-namespace BotsManagerService
+namespace CryptoSwapMaster.Service
 {
     public partial class BotsManager : ServiceBase
     {

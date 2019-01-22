@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using RestSharp.Deserializers;
 using RestSharp.Serializers;
 
-namespace BinanceApiAdapter
+namespace CryptoSwapMaster.BinanceApiAdapter
 {
     public class RestSharpJsonSerializer : ISerializer, IDeserializer
     {

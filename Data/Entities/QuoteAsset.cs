@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Data.Entities
+namespace CryptoSwapMaster.Data.Entities
 {
     [Table("QuoteAssets")]
     public class QuoteAsset

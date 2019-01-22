@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace BinanceApiAdapter.Types
+namespace CryptoSwapMaster.BinanceApiAdapter.Types
 {
     public class ServerTime
     {

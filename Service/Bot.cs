@@ -1,13 +1,13 @@
-﻿using Data.Entities;
+﻿using CryptoSwapMaster.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BinanceApiAdapter;
+using CryptoSwapMaster.BinanceApiAdapter;
 
-namespace BotsManagerService
+namespace CryptoSwapMaster.Service
 {
     public class Bot
     {

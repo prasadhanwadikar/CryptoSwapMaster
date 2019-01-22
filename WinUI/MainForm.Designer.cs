@@ -1,4 +1,4 @@
-﻿namespace UI
+﻿namespace CryptoSwapMaster.WinUI
 {
     partial class MainForm
     {

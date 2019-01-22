@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{2CF6FA72-DC9D-4840-8E9F-450BC9929BE8}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>BotsManagerService</RootNamespace>
-    <AssemblyName>BotsManagerService</AssemblyName>
+    <RootNamespace>CryptoSwapMaster.Service</RootNamespace>
+    <AssemblyName>CryptoSwapMaster.Service</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -81,13 +81,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BinanceApiAdapter\BinanceApiAdapter.csproj">
+    <ProjectReference Include="..\BinanceApiAdapter\CryptoSwapMaster.BinanceApiAdapter.csproj">
       <Project>{1f687f75-549f-44fa-b9b1-91cedfa1acc1}</Project>
-      <Name>BinanceApiAdapter</Name>
+      <Name>CryptoSwapMaster.BinanceApiAdapter</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Data\Data.csproj">
+    <ProjectReference Include="..\Data\CryptoSwapMaster.Data.csproj">
       <Project>{af6d1dcf-1f78-4745-9abe-325d92f5432b}</Project>
-      <Name>Data</Name>
+      <Name>CryptoSwapMaster.Data</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

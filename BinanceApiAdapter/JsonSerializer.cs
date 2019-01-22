@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BinanceApiAdapter
+namespace CryptoSwapMaster.BinanceApiAdapter
 {
     public class JsonSerializer
     {

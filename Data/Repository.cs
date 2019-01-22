@@ -7,10 +7,10 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
-using Data.Entities;
-using Data.Enums;
+using CryptoSwapMaster.Data.Entities;
+using CryptoSwapMaster.Data.Enums;
 
-namespace Data
+namespace CryptoSwapMaster.Data
 {
     public class Repository
     {

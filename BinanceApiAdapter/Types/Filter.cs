@@ -1,6 +1,6 @@
-﻿using BinanceApiAdapter.Enums;
+﻿using CryptoSwapMaster.BinanceApiAdapter.Enums;
 
-namespace BinanceApiAdapter.Types
+namespace CryptoSwapMaster.BinanceApiAdapter.Types
 {
     public class Filter
     {
