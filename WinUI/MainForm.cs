@@ -81,6 +81,10 @@ namespace CryptoSwapMaster.WinUI
                 txtApiKey.Text = _user.ApiKey;
                 txtSecretKey.Text = _user.SecretKey;
                 _binance.Reset(_user.ApiKey, _user.SecretKey, 30000, 9000);
+
+                cbBaseAsset2.SelectedIndex = 0;
+                cbOrderStatus.SelectedIndex = 0;
+
                 LoadDashboard();
             }
             catch (Exception ex)
@@ -521,9 +525,25 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
-                var orders = _db.GetOrders(_user.Id)
-                                .OrderByDescending(x => x.Pool).ThenBy(x => x.Group).ThenBy(x => x.Id)
-                                .ToList();
+                var baseAsset = cbBaseAsset2.SelectedItem.ToString();
+                var status = cbOrderStatus.SelectedItem.ToString();
+
+                var orders = _db.GetOrders(_user.Id);
+
+                var assets = orders.Select(x => x.BaseAsset).Distinct().ToList();
+                cbBaseAsset2.Items.Clear();
+                cbBaseAsset2.Items.Add("All");
+                foreach (var asset in assets)
+                    cbBaseAsset2.Items.Add(asset);
+                cbBaseAsset2.SelectedItem = baseAsset;
+
+                if (baseAsset != "All")
+                    orders = orders.Where(x => x.BaseAsset == baseAsset).ToList();
+                if (status != "All")
+                    orders = orders.Where(x => x.Status.ToString() == status).ToList();
+                
+                orders = orders.OrderBy(x => x.BaseAsset).OrderByDescending(x => x.Pool)
+                    .ThenBy(x => x.Group).ThenBy(x => x.Id).ToList();
 
                 ordersHistoryBindingSource.Clear();
                 foreach (var order in orders)
