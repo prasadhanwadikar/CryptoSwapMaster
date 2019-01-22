@@ -33,7 +33,6 @@ namespace UI
         private AccountInfo _accountInfo;
         private List<Order> _openOrders;
 
-        private List<int> _lastOpenOrdersIds;
         private string _baseAsset = string.Empty;
         private double _baseAssetFreeBalance = 0.0;
         private int _pool = 0;
@@ -48,7 +47,6 @@ namespace UI
 
             _quoteUpdateLock = new object();
             _quoteAssets = new List<string>();
-            _lastOpenOrdersIds = new List<int>();
 
             _bgwRefreshQuotes = new BackgroundWorker {WorkerSupportsCancellation = true};
             _bgwRefreshQuotes.DoWork += RefreshData;
@@ -72,6 +70,9 @@ namespace UI
                 _user = _db.GetUser(lblIPValue.Text);
                 if (_user == null)
                 {
+                    tpDashboard.Enabled = false;
+                    tpOrdersHistory.Enabled = false;
+                    btnChangeBotStatus.Enabled = false;
                     tcSections.SelectedTab = tpSettings;
                     MessageBox.Show("Provide ApiKey and SecretKey to get started!", "Unknown IP", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
@@ -80,7 +81,7 @@ namespace UI
                 txtApiKey.Text = _user.ApiKey;
                 txtSecretKey.Text = _user.SecretKey;
                 _binance.Reset(_user.ApiKey, _user.SecretKey, 30000, 9000);
-
+                UpdateBotStatus(_user.BotStatus);
                 LoadDashboard();
             }
             catch (Exception ex)
@@ -91,6 +92,9 @@ namespace UI
 
         private void LoadDashboard()
         {
+            tpDashboard.Enabled = true;
+            tpOrdersHistory.Enabled = true;
+            btnChangeBotStatus.Enabled = true;
             tcSections.SelectedTab = tpDashboard;
             if (!_timer.Enabled) _timer.Start();
             if (_bgwRefreshQuotes.IsBusy) return;
@@ -115,27 +119,19 @@ namespace UI
             _accountInfo = _binance.AccountInfo;
             _allAssets = _accountInfo.Balances.Select(x => x.Asset).ToList();
             _quoteAssets = _db.GetQuoteAssets(_user.Id).Select(x => x.Asset).Where(y => _allAssets.Any(z => z == y)).ToList();
-            _openOrders = _db.GetOrders(_user.Id, OrderStatus.Open);
-
-            var dtBalance = new DataTable("Balances");
-            dtBalance.Columns.Add("Coin");
-            dtBalance.Columns.Add("Balance");
+            
+            var dtBalances = new DataTable("Balances");
+            dtBalances.Columns.Add("Asset");
+            dtBalances.Columns.Add("Balance");
             foreach (var asset in _quoteAssets)
-            {
-                dtBalance.Columns.Add(asset);
-            }
+                dtBalances.Columns.Add(asset);
 
             foreach (var balance in _accountInfo.Balances.Where(x => x.Free > 0))
             {
                 if (_binance.IsInsufficientQty(balance.Asset, balance.Free)) continue;
-                if (string.IsNullOrEmpty(_baseAsset))
-                {
-                    _baseAsset = balance.Asset;
-                    _baseAssetFreeBalance = balance.Free;
-                }
 
-                var newRow = dtBalance.Rows.Add();
-                newRow["Coin"] = balance.Asset;
+                var newRow = dtBalances.Rows.Add();
+                newRow["Asset"] = balance.Asset;
                 newRow["Balance"] = balance.Free;
                 Parallel.ForEach(_quoteAssets, (quoteAsset) =>
                 {
@@ -147,7 +143,7 @@ namespace UI
                 });
             }
 
-            e.Result = dtBalance;
+            e.Result = dtBalances;
         }
 
         private void RefreshDataCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -165,18 +161,30 @@ namespace UI
                     throw e.Error;
                 }
 
+                var dtBalances = (DataTable)e.Result;
+                dgBalance.DataSource = dtBalances;
+
+                cbBaseAsset.Items.Clear();
+                foreach (var row in dtBalances.Rows)
+                    cbBaseAsset.Items.Add(((DataRow)row)["Asset"]);
+
+                if (cbBaseAsset.Items.Contains(_baseAsset))
+                    cbBaseAsset.SelectedItem = _baseAsset;
+                else
+                    cbBaseAsset.SelectedIndex = 0;
+
                 if (clbQuoteAssets.Items.Count != _allAssets.Count)
                 {
                     clbQuoteAssets.Items.Clear();
                     foreach (var asset in _allAssets)
-                    {
                         clbQuoteAssets.Items.Add(asset, _quoteAssets.Contains(asset));
-                    }
                 }
 
-                dgBalance.DataSource = e.Result;
-
-                RenderOpenOrders();
+                if (_user.BotStatus == (BotStatus.StartRequested | BotStatus.StopRequested))
+                {
+                    _user = _db.GetUser(lblIPValue.Text);
+                    UpdateBotStatus(_user.BotStatus);
+                }
             }
             catch (Exception ex)
             {
@@ -184,73 +192,86 @@ namespace UI
             }
         }
 
-        private void RenderOpenOrders()
+        private void UpdateBotStatus(BotStatus status)
         {
-            if (cbPool.Items.Count == 0)
+            switch (status)
             {
-                cbPool.Items.Add("New");
-                cbPool.SelectedIndex = 0;
-            }
+                case BotStatus.StartRequested:
+                    lblBotStatus.Text = "Starting ...";
+                    lblBotStatus.ForeColor = Color.Blue;
+                    btnChangeBotStatus.Text = "Stop";
+                    break;
 
-            var existingQuoteAssets = cbQuoteAsset.Items.OfType<string>();
-            if (existingQuoteAssets.Except(_quoteAssets).Any() || _quoteAssets.Except(existingQuoteAssets).Any())
+                case BotStatus.Running:
+                    lblBotStatus.Text = "ON";
+                    lblBotStatus.ForeColor = Color.Green;
+                    btnChangeBotStatus.Text = "Stop";
+                    break;
+
+                case BotStatus.StopRequested:
+                    lblBotStatus.Text = "Stopping ...";
+                    lblBotStatus.ForeColor = Color.Blue;
+                    btnChangeBotStatus.Text = "Start";
+                    break;
+
+                case BotStatus.Stopped:
+                    lblBotStatus.Text = "OFF";
+                    lblBotStatus.ForeColor = Color.Red;
+                    btnChangeBotStatus.Text = "Start";
+                    break;
+            }
+        }
+
+        private void cbBaseAsset_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
             {
+                _baseAsset = cbBaseAsset.SelectedItem.ToString();
+
+                RefreshOpenOrders();
+
                 cbQuoteAsset.Items.Clear();
-                foreach (var quoteAsset in _quoteAssets)
-                {
+                foreach (var quoteAsset in _quoteAssets.Where(x => x != _baseAsset))
                     cbQuoteAsset.Items.Add(quoteAsset);
-                }
 
-                cbQuoteAsset.SelectedIndex = 0;
+                if (cbQuoteAsset.Items.Contains(_quoteAsset))
+                    cbQuoteAsset.SelectedItem = _quoteAsset;
+                else
+                    cbQuoteAsset.SelectedIndex = 0;
             }
-
-            var openOrdersIds = _openOrders.Where(x => x.BaseAsset == _baseAsset).Select(x => x.Id);
-            if (!_lastOpenOrdersIds.Except(openOrdersIds).Any() && !openOrdersIds.Except(_lastOpenOrdersIds).Any()) return;
-
-            _lastOpenOrdersIds.Clear();
-            tableOpenOrders.RowCount = 2;
-            tableOpenOrders.RowCount++;
-
-            var poolOrdersGroups = _openOrders.Where(x => x.BaseAsset == _baseAsset).GroupBy(x => x.Pool);
-            foreach (var poolOrdersGroup in poolOrdersGroups)
+            catch (Exception ex)
             {
-                var poolRow = tableOpenOrders.RowCount - 1;
-                var groupOrdersGroups = poolOrdersGroup.GroupBy(x => x.Group);
-                foreach (var groupOrdersGroup in groupOrdersGroups)
-                {
-                    var groupRow = tableOpenOrders.RowCount - 1;
-                    foreach (var order in groupOrdersGroup)
-                    {
-                        var orderRow = tableOpenOrders.RowCount - 1;
-                        tableOpenOrders.Controls.Add(GetLabel(order.QuoteAsset), 2, orderRow);
-                        tableOpenOrders.Controls.Add(GetLabel(order.BaseQty.ToString()), 3, orderRow);
-                        tableOpenOrders.Controls.Add(GetLabel(order.ExpectedQuoteQty.ToString()), 4, orderRow);
-                        tableOpenOrders.Controls.Add(GetButton("-", order.Id, removeOrderClick), 5, orderRow);
-                        tableOpenOrders.RowCount++;
-                        _lastOpenOrdersIds.Add(order.Id);
-                    }
-                    var groupLabel = (Control)GetLabel(groupOrdersGroup.Key.ToString());
-                    tableOpenOrders.Controls.Add(groupLabel, 1, groupRow);
-                    tableOpenOrders.SetRowSpan(groupLabel, groupOrdersGroup.Count());
-                }
-                var poolLabel = (Control)GetLabel(poolOrdersGroup.Key.ToString());
-                tableOpenOrders.Controls.Add(poolLabel, 0, poolRow);
-                tableOpenOrders.SetRowSpan(poolLabel, poolOrdersGroup.Count());
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
 
-            var poolNums = poolOrdersGroups.Select(x => x.Key);
-            var existingPoolNums = cbPool.Items.OfType<int>();
-            if (poolNums.Except(existingPoolNums).Any() || existingPoolNums.Except(poolNums).Any())
-            {
-                cbPool.Items.Clear();
-                cbPool.Items.Add("New");
-                foreach (var poolNum in poolNums)
-                {
-                    cbPool.Items.Add(poolNum);
-                }
+        private void RefreshOpenOrders()
+        {
+            if (string.IsNullOrWhiteSpace(_baseAsset)) return;
 
+            var balance = _accountInfo.Balances.FirstOrDefault(x => x.Asset == _baseAsset);
+            _baseAssetFreeBalance = balance != null ? balance.Free : 0.0;
+            lblFreeBalValue.Text = _baseAssetFreeBalance.ToString();
+
+            _openOrders = _db.GetOrders(_user.Id, OrderStatus.Open)
+                .Where(x => x.BaseAsset == _baseAsset)
+                .OrderBy(x => x.Pool).ThenBy(x => x.Group).ThenBy(x => x.Id)
+                .ToList();
+
+            openOrdersBindingSource.Clear();
+            foreach (var order in _openOrders)
+                openOrdersBindingSource.Add(order);
+
+            cbPool.Items.Clear();
+            cbPool.Items.Add("New");
+            var poolNums = _openOrders.Select(x => x.Pool).Distinct();
+            foreach (var poolNum in poolNums)
+                cbPool.Items.Add(poolNum);
+
+            if (cbPool.Items.Contains(_pool))
+                cbPool.SelectedItem = _pool;
+            else
                 cbPool.SelectedIndex = 0;
-            }
         }
 
         private void cbPool_SelectedIndexChanged(object sender, EventArgs e)
@@ -258,15 +279,17 @@ namespace UI
             try
             {
                 _pool = cbPool.SelectedItem.ToString() == "New" ? 0 : Convert.ToInt32(cbPool.SelectedItem);
+
                 cbGroup.Items.Clear();
                 cbGroup.Items.Add("New");
-                var groups = _openOrders.Where(x => x.BaseAsset == _baseAsset && x.Pool == _pool).Select(x => x.Group);
+                var groups = _openOrders.Where(x => x.Pool == _pool).Select(x => x.Group);
                 foreach (var group in groups)
-                {
                     cbGroup.Items.Add(group);
-                }
 
-                cbGroup.SelectedIndex = 0;
+                if (cbGroup.Items.Contains(_group))
+                    cbGroup.SelectedItem = _group;
+                else
+                    cbGroup.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -328,31 +351,45 @@ namespace UI
 
         private void ValidateOrder(bool setQuoteQty = true)
         {
-            if (!double.TryParse(tbBaseQty.Text.Trim(), out _baseQty) || _baseQty < 0.0)
-                throw new Exception("Invalid Base Qty");
+            try
+            {
+                if (string.IsNullOrEmpty(_baseAsset))
+                    throw new Exception("Missing Base Asset");
 
-            if (_binance.IsInsufficientQty(_baseAsset, _baseQty))
-                throw new Exception("Base Qty too less for an order");
-            
-            var groupSum = _openOrders.Where(x => x.BaseAsset == _baseAsset && x.Pool == _pool && x.Group == _group)
-                    .Sum(x => x.BaseQty);
+                if (_baseAsset == _quoteAsset)
+                    throw new Exception("Base and Quote Asset should be different");
 
-            var otherPoolsMaxQtySum = _openOrders.Where(x => x.BaseAsset == _baseAsset && x.Pool != _pool)
+                if (!double.TryParse(tbBaseQty.Text.Trim(), out _baseQty) || _baseQty < 0.0)
+                    throw new Exception("Invalid Base Qty");
+
+                if (_binance.IsInsufficientQty(_baseAsset, _baseQty))
+                    throw new Exception("Base Qty too less for an order");
+
+                var groupSum = _openOrders.Where(x => x.Pool == _pool && x.Group == _group).Sum(x => x.BaseQty);
+
+                var otherPoolsMaxQtySum = _openOrders.Where(x => x.Pool != _pool)
                     .GroupBy(x => x.Pool).Sum(x => x.GroupBy(y => y.Group).Max(y => y.Sum(z => z.BaseQty)));
 
-            var maxPossibleBaseQty = _baseAssetFreeBalance - otherPoolsMaxQtySum - groupSum;
+                var maxPossibleBaseQty = _baseAssetFreeBalance - otherPoolsMaxQtySum - groupSum;
 
-            if (_baseQty > maxPossibleBaseQty)
-                throw new Exception("Maximum available Base Qty for this order is " + maxPossibleBaseQty);
+                if (_baseQty > maxPossibleBaseQty)
+                    throw new Exception("Maximum available Base Qty for this order is " + maxPossibleBaseQty);
 
-            if (setQuoteQty)
-            {
-                tbQuoteQty.Text = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission).ToString();
+                if (setQuoteQty)
+                {
+                    tbQuoteQty.Text = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission).ToString();
+                }
+                else
+                {
+                    if (!double.TryParse(tbQuoteQty.Text.Trim(), out _quoteQty) || _quoteQty < 0.0)
+                        throw new Exception("Invalid Quote Qty");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                if (!double.TryParse(tbQuoteQty.Text.Trim(), out _quoteQty) || _quoteQty < 0.0)
-                    throw new Exception("Invalid Quote Qty");
+                tbBaseQty.Text = "";
+                tbQuoteQty.Text = "";
+                throw ex;
             }
         }
 
@@ -362,8 +399,9 @@ namespace UI
             {
                 ValidateOrder(setQuoteQty: false);
                 _db.AddOrder(_user.Id, _baseAsset, _pool, _group, _baseQty, _quoteAsset, _quoteQty);
-                _openOrders = _db.GetOrders(_user.Id, OrderStatus.Open);
-                RenderOpenOrders();
+                tbBaseQty.Text = "";
+                tbQuoteQty.Text = "";
+                RefreshOpenOrders();
             }
             catch (Exception ex)
             {
@@ -371,45 +409,20 @@ namespace UI
             }
         }
 
-        private void removeOrderClick(object sender, EventArgs e)
+        private void dgOpenOrders_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             try
             {
-                var button = (Control)sender;
-                var orderId = Convert.ToInt32(button.Tag);
-                _db.CancelOrder(orderId, "Cancelled by you");
-                _openOrders = _db.GetOrders(_user.Id, OrderStatus.Open);
-                RenderOpenOrders();
+                if (e.RowIndex < 0 || e.ColumnIndex != dgOpenOrders.Columns["Action"].Index) return;
+
+                var orderId = Convert.ToInt32(dgOpenOrders.Rows[e.RowIndex].Cells[0].Value);
+                _db.CancelOrder(orderId, null);
+                RefreshOpenOrders();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private Label GetLabel(string text)
-        {
-            return new Label
-            {
-                Text = text,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Anchor = AnchorStyles.None
-            };
-        }
-
-        private Button GetButton(string label, int tag, Action<object, EventArgs> handler)
-        {
-            var button = new Button
-            {
-                Text = label,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Anchor = AnchorStyles.None,
-                Tag = tag
-            };
-
-            button.Click += new EventHandler(handler);
-
-            return button;
         }
         
         private void btnSaveSettings_Click(object sender, EventArgs e)
@@ -491,6 +504,38 @@ namespace UI
                 err = "Invalid Secret Key";
             }
             MessageBox.Show(err, "Binance Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void btnRefreshOrdersHistory_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var orders = _db.GetOrders(_user.Id)
+                                .OrderByDescending(x => x.Pool).ThenBy(x => x.Group).ThenBy(x => x.Id)
+                                .ToList();
+
+                ordersHistoryBindingSource.Clear();
+                foreach (var order in orders)
+                    ordersHistoryBindingSource.Add(order);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnChangeBotStatus_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var botStatus = btnChangeBotStatus.Text == "Start" ? BotStatus.StartRequested : BotStatus.StopRequested;
+               _db.UpdateBotStatus(_user.Id, botStatus);
+               UpdateBotStatus(botStatus);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

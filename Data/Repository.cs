@@ -110,6 +110,14 @@ namespace Data
             }
         }
 
+        public List<Order> GetOrders(int userId)
+        {
+            using (var context = new Context())
+            {
+                return context.Orders.Where(x => x.UserId == userId).ToList();
+            }
+        }
+
         public void AddOrder(int userId, string baseAsset, int pool, int group, double baseQty, string quoteAsset, double quoteQty)
         {
             using (var context = new Context())
@@ -144,7 +152,7 @@ namespace Data
                 var anyPoolOrderInProcess = context.Orders.Any(x => x.UserId == userId
                                                                     && x.BaseAsset == baseAsset
                                                                     && x.Pool == pool
-                                                                    && x.Status != OrderStatus.Open);
+                                                                    && x.Status == (OrderStatus.InProcess | OrderStatus.Completed));
                 if (anyPoolOrderInProcess) throw new Exception("Failed to add as other order from same pool is in process");
 
                 context.Orders.Add(order);
