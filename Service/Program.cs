@@ -14,19 +14,22 @@ namespace CryptoSwapMaster.Service
         /// </summary>
         static void Main()
         {
-            var botsManager = new BotsManager();
-            botsManager.Start();
-            Console.Read();
-            botsManager.Stop();
-
-            /*
-            ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[]
+            if (System.Diagnostics.Debugger.IsAttached)
             {
-                new BotsManager()
-            };
-            ServiceBase.Run(ServicesToRun);
-            */
+                var botsManager = new BotsManager();
+                botsManager.Start();
+                Console.Read();
+                botsManager.Stop();
+            }
+            else
+            {
+                ServiceBase[] ServicesToRun;
+                ServicesToRun = new ServiceBase[]
+                {
+                    new BotsManager()
+                };
+                ServiceBase.Run(ServicesToRun);
+            }
         }
     }
 }

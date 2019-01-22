@@ -66,13 +66,13 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
+                btnChangeBotStatus.Enabled = false;
                 lblIPValue.Text = new WebClient().DownloadString("https://ipinfo.io/ip").Trim();
                 _user = _db.GetUser(lblIPValue.Text);
                 if (_user == null)
                 {
                     tpDashboard.Enabled = false;
                     tpOrdersHistory.Enabled = false;
-                    btnChangeBotStatus.Enabled = false;
                     tcSections.SelectedTab = tpSettings;
                     MessageBox.Show("Provide ApiKey and SecretKey to get started!", "Unknown IP", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
@@ -81,7 +81,6 @@ namespace CryptoSwapMaster.WinUI
                 txtApiKey.Text = _user.ApiKey;
                 txtSecretKey.Text = _user.SecretKey;
                 _binance.Reset(_user.ApiKey, _user.SecretKey, 30000, 9000);
-                UpdateBotStatus(_user.BotStatus);
                 LoadDashboard();
             }
             catch (Exception ex)
@@ -94,7 +93,6 @@ namespace CryptoSwapMaster.WinUI
         {
             tpDashboard.Enabled = true;
             tpOrdersHistory.Enabled = true;
-            btnChangeBotStatus.Enabled = true;
             tcSections.SelectedTab = tpDashboard;
             if (!_timer.Enabled) _timer.Start();
             if (_bgwRefreshQuotes.IsBusy) return;
@@ -116,6 +114,7 @@ namespace CryptoSwapMaster.WinUI
 
         private void RefreshData(object sender, DoWorkEventArgs e)
         {
+            _user = _db.GetUser(lblIPValue.Text);
             _accountInfo = _binance.AccountInfo;
             _allAssets = _accountInfo.Balances.Select(x => x.Asset).ToList();
             _quoteAssets = _db.GetQuoteAssets(_user.Id).Select(x => x.Asset).Where(y => _allAssets.Any(z => z == y)).ToList();
@@ -180,11 +179,7 @@ namespace CryptoSwapMaster.WinUI
                         clbQuoteAssets.Items.Add(asset, _quoteAssets.Contains(asset));
                 }
 
-                if (_user.BotStatus == (BotStatus.StartRequested | BotStatus.StopRequested))
-                {
-                    _user = _db.GetUser(lblIPValue.Text);
-                    UpdateBotStatus(_user.BotStatus);
-                }
+                UpdateBotStatus();
             }
             catch (Exception ex)
             {
@@ -192,32 +187,36 @@ namespace CryptoSwapMaster.WinUI
             }
         }
 
-        private void UpdateBotStatus(BotStatus status)
+        private void UpdateBotStatus()
         {
-            switch (status)
+            switch (_user.BotStatus)
             {
                 case BotStatus.StartRequested:
                     lblBotStatus.Text = "Starting ...";
                     lblBotStatus.ForeColor = Color.Blue;
-                    btnChangeBotStatus.Text = "Stop";
+                    btnChangeBotStatus.Text = "Stop Bot";
+                    btnChangeBotStatus.Enabled = false;
                     break;
 
                 case BotStatus.Running:
                     lblBotStatus.Text = "ON";
                     lblBotStatus.ForeColor = Color.Green;
-                    btnChangeBotStatus.Text = "Stop";
+                    btnChangeBotStatus.Text = "Stop Bot";
+                    btnChangeBotStatus.Enabled = true;
                     break;
 
                 case BotStatus.StopRequested:
                     lblBotStatus.Text = "Stopping ...";
                     lblBotStatus.ForeColor = Color.Blue;
-                    btnChangeBotStatus.Text = "Start";
+                    btnChangeBotStatus.Text = "Start Bot";
+                    btnChangeBotStatus.Enabled = false;
                     break;
 
                 case BotStatus.Stopped:
                     lblBotStatus.Text = "OFF";
                     lblBotStatus.ForeColor = Color.Red;
-                    btnChangeBotStatus.Text = "Start";
+                    btnChangeBotStatus.Text = "Start Bot";
+                    btnChangeBotStatus.Enabled = true;
                     break;
             }
         }
@@ -313,8 +312,9 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
+                if (_quoteAsset == cbQuoteAsset.SelectedItem.ToString()) return;
                 _quoteAsset = cbQuoteAsset.SelectedItem.ToString();
-                if (string.IsNullOrWhiteSpace(tbBaseQty.Text)) return;
+                if (_baseQty <= 0.0) return;
                 ValidateOrder();
             }
             catch (Exception ex)
@@ -327,11 +327,20 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(tbBaseQty.Text) || tbBaseQty.Text == _baseQty.ToString()) return;
-                ValidateOrder();
+                var oldBaseQty = _baseQty;
+                if (!double.TryParse(tbBaseQty.Text.Trim(), out _baseQty) || _baseQty <= 0.0)
+                {
+                    _baseQty = 0.0;
+                    _quoteQty = 0.0;
+                    tbQuoteQty.Text = "";
+                    if (!string.IsNullOrWhiteSpace(tbBaseQty.Text)) throw new Exception("Invalid Base Qty");
+                    return;
+                }
+                if (_baseQty != oldBaseQty) ValidateOrder();
             }
             catch (Exception ex)
             {
+                tbBaseQty.Focus();
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -340,11 +349,15 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(tbQuoteQty.Text) || tbQuoteQty.Text == _quoteQty.ToString()) return;
-                ValidateOrder(setQuoteQty: false);
+                if (!double.TryParse(tbQuoteQty.Text.Trim(), out _quoteQty) || _quoteQty <= 0.0)
+                {
+                    _quoteQty = 0.0;
+                    if (!string.IsNullOrWhiteSpace(tbQuoteQty.Text)) throw new Exception("Invalid Quote Qty");
+                }
             }
             catch (Exception ex)
             {
+                tbQuoteQty.Focus();
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -353,17 +366,13 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
-                if (string.IsNullOrEmpty(_baseAsset))
-                    throw new Exception("Missing Base Asset");
+                if (string.IsNullOrEmpty(_baseAsset)) throw new Exception("Missing Base Asset");
 
-                if (_baseAsset == _quoteAsset)
-                    throw new Exception("Base and Quote Asset should be different");
+                if (_baseAsset == _quoteAsset) throw new Exception("Base and Quote Asset should be different");
 
-                if (!double.TryParse(tbBaseQty.Text.Trim(), out _baseQty) || _baseQty < 0.0)
-                    throw new Exception("Invalid Base Qty");
+                if (_baseQty <= 0.0) throw new Exception("Invalid Base Qty");
 
-                if (_binance.IsInsufficientQty(_baseAsset, _baseQty))
-                    throw new Exception("Base Qty too less for an order");
+                if (_binance.IsInsufficientQty(_baseAsset, _baseQty)) throw new Exception("Base Qty is too less for an order");
 
                 var groupSum = _openOrders.Where(x => x.Pool == _pool && x.Group == _group).Sum(x => x.BaseQty);
 
@@ -377,18 +386,20 @@ namespace CryptoSwapMaster.WinUI
 
                 if (setQuoteQty)
                 {
-                    tbQuoteQty.Text = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission).ToString();
+                    _quoteQty = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission);
+                    tbQuoteQty.Text = _quoteQty.ToString();
                 }
                 else
                 {
-                    if (!double.TryParse(tbQuoteQty.Text.Trim(), out _quoteQty) || _quoteQty < 0.0)
-                        throw new Exception("Invalid Quote Qty");
+                    if (_quoteQty <= 0.0) throw new Exception("Invalid Quote Qty");
                 }
             }
             catch (Exception ex)
             {
                 tbBaseQty.Text = "";
+                _baseQty = 0.0;
                 tbQuoteQty.Text = "";
+                _quoteQty = 0.0;
                 throw ex;
             }
         }
@@ -528,9 +539,9 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
-                var botStatus = btnChangeBotStatus.Text == "Start" ? BotStatus.StartRequested : BotStatus.StopRequested;
-               _db.UpdateBotStatus(_user.Id, botStatus);
-               UpdateBotStatus(botStatus);
+                _user.BotStatus = btnChangeBotStatus.Text == "Start Bot" ? BotStatus.StartRequested : BotStatus.StopRequested;
+               _db.UpdateBotStatus(_user.Id, _user.BotStatus);
+               UpdateBotStatus();
             }
             catch (Exception ex)
             {
