@@ -254,49 +254,62 @@ namespace CryptoSwapMaster.BinanceApiAdapter
             return false;
         }
 
-        private double GetPrice(string symbol)
+        public double GetBestPossibleLotSize(string baseAsset, double baseQty)
         {
-            var request = new RestRequest("/api/v3/ticker/price", Method.GET, DataFormat.Json);
-            request.AddParameter("symbol", symbol);
-            var symbolInfo = ProcessRequest<SymbolInfo>(request);
-            return symbolInfo.Price;
-        }
-
-        private double GetQuote(SymbolInfo symbolInfo, BinanceOrderSide orderSide, double baseQty, double takerCommission)
-        {
-            var quoteQty = 0.0;
-            var commissionFactor = (10000 - takerCommission) / 10000;
-
-            var symbolOrdersInfo = GetOrders(symbolInfo.Symbol);
-
-            if (orderSide == BinanceOrderSide.BUY)
+            if (baseAsset == "USDT")
             {
-                foreach (var ask in symbolOrdersInfo.AskOrders)
-                {
-                    if (baseQty <= ask.Qty * ask.Price)
-                    {
-                        quoteQty += Math.Round(baseQty / ask.Price * commissionFactor, symbolInfo.BaseAssetPrecision);
-                        break;
-                    }
-                    baseQty -= Math.Round(ask.Qty * ask.Price, symbolInfo.BaseAssetPrecision);
-                    quoteQty += ask.Qty * commissionFactor;
-                }
+                if (baseQty < 0.01) throw new Exception("Base Qty is too less for an order");
+                baseQty = Math.Round(baseQty - ((baseQty - 0.01) % 0.01), 2);
             }
             else
             {
-                foreach (var bid in symbolOrdersInfo.BidOrders)
+                var symbol = baseAsset == "BTC" ? "BTCUSDT" : baseAsset + "BTC";
+                var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
+                var lotSizeFilter = symbolInfo.Filters.FirstOrDefault(x => x.FilterType == FilterType.LOT_SIZE);
+                if (lotSizeFilter != null)
                 {
-                    if (baseQty <= bid.Qty)
-                    {
-                        quoteQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
-                        break;
-                    }
-                    baseQty -= bid.Qty;
-                    quoteQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
+                    if (baseQty < lotSizeFilter.MinQty) throw new Exception("Base Qty is too less for an order");
+                    var fraction = (baseQty - lotSizeFilter.MinQty) % lotSizeFilter.StepSize;
+                    if (fraction > lotSizeFilter.StepSize)
+                        baseQty = Math.Round(baseQty - fraction, 8);
                 }
             }
 
-            return quoteQty;
+            return baseQty;
+        }
+
+        private SymbolInfo GetFirstSymbolInPair(string baseAsset, string quoteAsset)
+        {
+            var symbol = "";
+            if (ExchangeInfo.Symbols.Any(x => x.Symbol == baseAsset + quoteAsset))
+            {
+                symbol = baseAsset + quoteAsset;
+            }
+            else if (ExchangeInfo.Symbols.Any(x => x.Symbol == quoteAsset + baseAsset))
+            {
+                symbol = quoteAsset + baseAsset;
+            }
+            else if (baseAsset == "USDT")
+            {
+                symbol = "BTC" + baseAsset;
+            }
+            else if (quoteAsset == "USDT")
+            {
+                symbol = baseAsset + "BTC";
+            }
+            else
+            {
+                symbol = baseAsset + "BTC";
+            }
+
+            return ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
+        }
+
+        public double GetQuote(string baseAsset, string quoteAsset, double baseQty, double takerCommission)
+        {
+            if (baseAsset == quoteAsset) return baseQty;
+            var orders = BuildOrders(baseAsset, quoteAsset, baseQty, takerCommission);
+            return orders.Last().CummulativeQuoteQty;
         }
 
         public List<OrderInfo> BuildOrders(string baseAsset, string quoteAsset, double baseQty, double takerCommission)
@@ -413,11 +426,41 @@ namespace CryptoSwapMaster.BinanceApiAdapter
             return orders;
         }
 
-        public double GetQuote(string baseAsset, string quoteAsset, double baseQty, double takerCommission)
+        private double GetQuote(SymbolInfo symbolInfo, BinanceOrderSide orderSide, double baseQty, double takerCommission)
         {
-            if (baseAsset == quoteAsset) return baseQty;
-            var orders = BuildOrders(baseAsset, quoteAsset, baseQty, takerCommission);
-            return orders.Last().CummulativeQuoteQty;
+            var quoteQty = 0.0;
+            var commissionFactor = (10000 - takerCommission) / 10000;
+
+            var symbolOrdersInfo = GetOrders(symbolInfo.Symbol);
+
+            if (orderSide == BinanceOrderSide.BUY)
+            {
+                foreach (var ask in symbolOrdersInfo.AskOrders)
+                {
+                    if (baseQty <= ask.Qty * ask.Price)
+                    {
+                        quoteQty += Math.Round(baseQty / ask.Price * commissionFactor, symbolInfo.BaseAssetPrecision);
+                        break;
+                    }
+                    baseQty -= Math.Round(ask.Qty * ask.Price, symbolInfo.BaseAssetPrecision);
+                    quoteQty += ask.Qty * commissionFactor;
+                }
+            }
+            else
+            {
+                foreach (var bid in symbolOrdersInfo.BidOrders)
+                {
+                    if (baseQty <= bid.Qty)
+                    {
+                        quoteQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
+                        break;
+                    }
+                    baseQty -= bid.Qty;
+                    quoteQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
+                }
+            }
+
+            return quoteQty;
         }
 
         private SymbolOrdersInfo GetOrders(string symbol)
@@ -466,6 +509,14 @@ namespace CryptoSwapMaster.BinanceApiAdapter
             {
                 //todo: log ex
             }
+        }
+
+        private double GetPrice(string symbol)
+        {
+            var request = new RestRequest("/api/v3/ticker/price", Method.GET, DataFormat.Json);
+            request.AddParameter("symbol", symbol);
+            var symbolInfo = ProcessRequest<SymbolInfo>(request);
+            return symbolInfo.Price;
         }
 
         public OrderInfo NewMarketOrder(string symbol, string side, double quantity)

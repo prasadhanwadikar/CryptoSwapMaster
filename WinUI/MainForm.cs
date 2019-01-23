@@ -374,9 +374,8 @@ namespace CryptoSwapMaster.WinUI
 
                 if (_baseAsset == _quoteAsset) throw new Exception("Base and Quote Asset should be different");
 
-                if (_baseQty <= 0.0) throw new Exception("Invalid Base Qty");
-
-                if (_binance.IsInsufficientQty(_baseAsset, _baseQty)) throw new Exception("Base Qty is too less for an order");
+                _baseQty = _binance.GetBestPossibleLotSize(_baseAsset, _baseQty);
+                tbBaseQty.Text = _baseQty.ToString();
 
                 var groupSum = _openOrders.Where(x => x.Pool == _pool && x.Group == _group).Sum(x => x.BaseQty);
 
@@ -415,7 +414,9 @@ namespace CryptoSwapMaster.WinUI
                 ValidateOrder(setQuoteQty: false);
                 _db.AddOrder(_user.Id, _baseAsset, _pool, _group, _baseQty, _quoteAsset, _quoteQty);
                 tbBaseQty.Text = "";
+                _baseQty = 0.0;
                 tbQuoteQty.Text = "";
+                _quoteQty = 0.0;
                 RefreshOpenOrders();
             }
             catch (Exception ex)
