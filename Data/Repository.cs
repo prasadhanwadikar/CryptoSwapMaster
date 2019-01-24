@@ -250,50 +250,62 @@ namespace CryptoSwapMaster.Data
                 dbExchangeOrder.StatusMsg = exchangeOrder.StatusMsg;
                 dbExchangeOrder.LastModified = DateTime.Now;
 
-                if (exchangeOrder.Sequence == 1)
+                if (exchangeOrder.Status != OrderStatus.InProcess)
                 {
-                    if (exchangeOrder.Side == "BUY")
-                        order.ExecutedBaseQty = exchangeOrder.QuoteQty;
-                    else
-                        order.ExecutedBaseQty = exchangeOrder.BaseQty;
-                }
+                    order.LastModified = DateTime.Now;
 
-                var qty = 0M;
-                if (exchangeOrder.Side == "BUY")
-                    qty = exchangeOrder.BaseQty;
-                else
-                    qty = exchangeOrder.QuoteQty;
-
-                if (exchangeOrder.Sequence == order.ExchangeOrders.Count)
-                {
-                    order.ReceivedQuoteQty = qty;
-                    order.Status = exchangeOrder.Status;
-                    order.StatusMsg = exchangeOrder.StatusMsg;
-                }
-                else
-                {
-                    var dbNextExchangeOrder = order.ExchangeOrders.FirstOrDefault(x => x.Sequence == 2);
-                    if (exchangeOrder.Status == OrderStatus.Cancelled)
+                    if (exchangeOrder.Sequence == 1 && exchangeOrder.Status == OrderStatus.Completed)
                     {
-                        dbNextExchangeOrder.Status = OrderStatus.Cancelled;
-                        dbNextExchangeOrder.StatusMsg = "First leg of order was failed or cancelled";
-                        dbNextExchangeOrder.LastModified = DateTime.Now;
-
-                        order.Status = OrderStatus.Cancelled;
-                        order.StatusMsg = exchangeOrder.StatusMsg;
-                    }
-                    else if (exchangeOrder.Status == OrderStatus.Completed)
-                    {
-                        if (dbNextExchangeOrder.Side == "BUY")
-                            dbNextExchangeOrder.QuoteQty = qty;
+                        if (exchangeOrder.Side == "BUY")
+                            order.ExecutedBaseQty = exchangeOrder.QuoteQty;
                         else
-                            dbNextExchangeOrder.BaseQty = qty;
+                            order.ExecutedBaseQty = exchangeOrder.BaseQty;
+                    }
 
-                        dbNextExchangeOrder.LastModified = DateTime.Now;
+                    var qty = 0M;
+                    if (exchangeOrder.Side == "BUY")
+                        qty = exchangeOrder.BaseQty;
+                    else
+                        qty = exchangeOrder.QuoteQty;
+
+                    if (exchangeOrder.Sequence == order.ExchangeOrders.Count) //if last order for a group
+                    {
+                        order.Status = exchangeOrder.Status;
+                        if (exchangeOrder.Status == OrderStatus.Completed)
+                        {
+                            order.ReceivedQuoteQty = qty;
+                            order.StatusMsg = null;
+                        }
+                        else
+                        {
+                            order.StatusMsg = (order.StatusMsg ?? "") + (exchangeOrder.StatusMsg ?? "");
+                        }
+                    }
+                    else
+                    {
+                        var dbNextExchangeOrder = order.ExchangeOrders.FirstOrDefault(x => x.Sequence == 2);
+                        if (exchangeOrder.Status == OrderStatus.Cancelled)
+                        {
+                            dbNextExchangeOrder.Status = OrderStatus.Cancelled;
+                            dbNextExchangeOrder.StatusMsg = "First leg of order was failed or cancelled";
+                            dbNextExchangeOrder.LastModified = DateTime.Now;
+
+                            order.Status = OrderStatus.Cancelled;
+                            order.StatusMsg = exchangeOrder.StatusMsg;
+                        }
+                        else if (exchangeOrder.Status == OrderStatus.Completed)
+                        {
+                            if (dbNextExchangeOrder.Side == "BUY")
+                                dbNextExchangeOrder.QuoteQty = qty;
+                            else
+                                dbNextExchangeOrder.BaseQty = qty;
+
+                            dbNextExchangeOrder.LastModified = DateTime.Now;
+
+                            order.StatusMsg = "First leg converted " + order.BaseAsset + " " + order.ExecutedBaseQty + " to BTC " + qty.ToString() + ". ";
+                        }
                     }
                 }
-
-                order.LastModified = DateTime.Now;
 
                 context.SaveChanges();
             }
