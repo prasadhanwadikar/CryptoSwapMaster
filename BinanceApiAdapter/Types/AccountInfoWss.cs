@@ -16,16 +16,16 @@ namespace CryptoSwapMaster.BinanceApiAdapter.Types
         public long EventTime { get; set; }
 
         [JsonProperty("m")]
-        public double MakerCommission { get; set; }
+        public decimal MakerCommission { get; set; }
 
         [JsonProperty("t")]
-        public double TakerCommission { get; set; }
+        public decimal TakerCommission { get; set; }
 
         [JsonProperty("b")]
-        public double BuyerCommission { get; set; }
+        public decimal BuyerCommission { get; set; }
 
         [JsonProperty("s")]
-        public double SellerCommission { get; set; }
+        public decimal SellerCommission { get; set; }
 
         [JsonProperty("T")]
         public bool CanTrade { get; set; }

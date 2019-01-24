@@ -12,7 +12,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter.Types
         public int BaseAssetPrecision { get; set; }
         public string QuoteAsset { get; set; }
         public int QuotePrecision { get; set; }
-        public double Price { get; set; }
+        public decimal Price { get; set; }
         public List<BinanceOrderType> OrderTypes { get; set; }
         public bool IcebergAllowed { get; set; }
         public List<Filter> Filters { get; set; }

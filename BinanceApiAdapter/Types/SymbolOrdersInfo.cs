@@ -19,7 +19,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter.Types
                 var bidOrders = new List<Bid>();
                 foreach (var arr in Bids)
                 {
-                    var bid = new Bid(Convert.ToDouble(arr[0]), Convert.ToDouble(arr[1]));
+                    var bid = new Bid(Convert.ToDecimal(arr[0]), Convert.ToDecimal(arr[1]));
                     bidOrders.Add(bid);
                 }
                 return bidOrders;
@@ -32,7 +32,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter.Types
                 var askOrders = new List<Ask>();
                 foreach (var arr in Asks)
                 {
-                    var ask = new Ask(Convert.ToDouble(arr[0]), Convert.ToDouble(arr[1]));
+                    var ask = new Ask(Convert.ToDecimal(arr[0]), Convert.ToDecimal(arr[1]));
                     askOrders.Add(ask);
                 }
                 return askOrders;

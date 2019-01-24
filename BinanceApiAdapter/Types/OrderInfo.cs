@@ -11,10 +11,10 @@ namespace CryptoSwapMaster.BinanceApiAdapter.Types
         public string OrigClientOrderId { get; set; }
         public string ClientOrderId { get; set; }
         public long TransactTime { get; set; }
-        public double Price { get; set; }
-        public double OrigQty { get; set; }
-        public double ExecutedQty { get; set; }
-        public double CummulativeQuoteQty { get; set; }
+        public decimal Price { get; set; }
+        public decimal OrigQty { get; set; }
+        public decimal ExecutedQty { get; set; }
+        public decimal CummulativeQuoteQty { get; set; }
         public BinanceOrderStatus Status { get; set; }
         public TimeInForce TimeInForce { get; set; }
         public BinanceOrderType Type { get; set; }

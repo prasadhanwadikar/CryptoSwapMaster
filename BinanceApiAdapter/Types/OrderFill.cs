@@ -8,9 +8,9 @@ namespace CryptoSwapMaster.BinanceApiAdapter.Types
 {
     public class OrderFill
     {
-        public double Price { get; set; }
-        public double Qty { get; set; }
-        public double Commission { get; set; }
+        public decimal Price { get; set; }
+        public decimal Qty { get; set; }
+        public decimal Commission { get; set; }
         public string CommissionAsset { get; set; }
     }
 }

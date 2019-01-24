@@ -34,12 +34,12 @@ namespace CryptoSwapMaster.WinUI
         private List<Order> _openOrders;
 
         private string _baseAsset = string.Empty;
-        private double _baseAssetFreeBalance = 0.0;
+        private decimal _baseAssetFreeBalance = 0M;
         private int _pool = 0;
         private int _group = 0;
         private string _quoteAsset = string.Empty;
-        private double _baseQty = 0.0;
-        private double _quoteQty = 0.0;
+        private decimal _baseQty = 0M;
+        private decimal _quoteQty = 0M;
 
         public MainForm()
         {
@@ -253,7 +253,7 @@ namespace CryptoSwapMaster.WinUI
             if (string.IsNullOrWhiteSpace(_baseAsset)) return;
 
             var balance = _accountInfo.Balances.FirstOrDefault(x => x.Asset == _baseAsset);
-            _baseAssetFreeBalance = balance != null ? balance.Free : 0.0;
+            _baseAssetFreeBalance = balance != null ? balance.Free : 0M;
             lblFreeBalValue.Text = _baseAssetFreeBalance.ToString();
 
             _openOrders = _db.GetOrders(_user.Id, OrderStatus.Open)
@@ -318,7 +318,7 @@ namespace CryptoSwapMaster.WinUI
             {
                 if (_quoteAsset == cbQuoteAsset.SelectedItem.ToString()) return;
                 _quoteAsset = cbQuoteAsset.SelectedItem.ToString();
-                if (_baseQty <= 0.0) return;
+                if (_baseQty <= 0M) return;
                 ValidateOrder();
             }
             catch (Exception ex)
@@ -332,10 +332,10 @@ namespace CryptoSwapMaster.WinUI
             try
             {
                 var oldBaseQty = _baseQty;
-                if (!double.TryParse(tbBaseQty.Text.Trim(), out _baseQty) || _baseQty <= 0.0)
+                if (!decimal.TryParse(tbBaseQty.Text.Trim(), out _baseQty) || _baseQty <= 0M)
                 {
-                    _baseQty = 0.0;
-                    _quoteQty = 0.0;
+                    _baseQty = 0M;
+                    _quoteQty = 0M;
                     tbQuoteQty.Text = "";
                     if (!string.IsNullOrWhiteSpace(tbBaseQty.Text)) throw new Exception("Invalid Base Qty");
                     return;
@@ -353,9 +353,9 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
-                if (!double.TryParse(tbQuoteQty.Text.Trim(), out _quoteQty) || _quoteQty <= 0.0)
+                if (!decimal.TryParse(tbQuoteQty.Text.Trim(), out _quoteQty) || _quoteQty <= 0M)
                 {
-                    _quoteQty = 0.0;
+                    _quoteQty = 0M;
                     if (!string.IsNullOrWhiteSpace(tbQuoteQty.Text)) throw new Exception("Invalid Quote Qty");
                 }
             }
@@ -374,7 +374,11 @@ namespace CryptoSwapMaster.WinUI
 
                 if (_baseAsset == _quoteAsset) throw new Exception("Base and Quote Asset should be different");
 
-                _baseQty = _binance.GetBestPossibleLotSize(_baseAsset, _baseQty);
+                if (_binance.IsInsufficientQty(_baseAsset, _baseQty))
+                    throw new Exception("Base Qty is too less for an order");
+
+                var symbol = _baseAsset == "BTC" || _baseAsset == "USDT" ? "BTCUSDT" : _baseAsset + "BTC";
+                _baseQty = _binance.GetBestPossibleLotSize(symbol, _baseQty);
                 tbBaseQty.Text = _baseQty.ToString();
 
                 var groupSum = _openOrders.Where(x => x.Pool == _pool && x.Group == _group).Sum(x => x.BaseQty);
@@ -394,15 +398,15 @@ namespace CryptoSwapMaster.WinUI
                 }
                 else
                 {
-                    if (_quoteQty <= 0.0) throw new Exception("Invalid Quote Qty");
+                    if (_quoteQty <= 0M) throw new Exception("Invalid Quote Qty");
                 }
             }
             catch (Exception ex)
             {
                 tbBaseQty.Text = "";
-                _baseQty = 0.0;
+                _baseQty = 0M;
                 tbQuoteQty.Text = "";
-                _quoteQty = 0.0;
+                _quoteQty = 0M;
                 throw ex;
             }
         }
@@ -414,9 +418,9 @@ namespace CryptoSwapMaster.WinUI
                 ValidateOrder(setQuoteQty: false);
                 _db.AddOrder(_user.Id, _baseAsset, _pool, _group, _baseQty, _quoteAsset, _quoteQty);
                 tbBaseQty.Text = "";
-                _baseQty = 0.0;
+                _baseQty = 0M;
                 tbQuoteQty.Text = "";
-                _quoteQty = 0.0;
+                _quoteQty = 0M;
                 RefreshOpenOrders();
             }
             catch (Exception ex)

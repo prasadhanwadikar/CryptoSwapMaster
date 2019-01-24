@@ -4,10 +4,10 @@ namespace CryptoSwapMaster.BinanceApiAdapter.Types
 {
     public class AccountInfo
     {
-        public double MakerCommission { get; set; }
-        public double TakerCommission { get; set; }
-        public double BuyerCommission { get; set; }
-        public double SellerCommission { get; set; }
+        public decimal MakerCommission { get; set; }
+        public decimal TakerCommission { get; set; }
+        public decimal BuyerCommission { get; set; }
+        public decimal SellerCommission { get; set; }
         public bool CanTrade { get; set; }
         public bool CanWithdraw { get; set; }
         public bool CanDeposit { get; set; }

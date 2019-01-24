@@ -15,6 +15,16 @@ namespace CryptoSwapMaster.Data
             Database.SetInitializer<Context>(null);
         }
 
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Order>().Property(p => p.BaseQty).HasPrecision(18, 8);
+            modelBuilder.Entity<Order>().Property(p => p.ExecutedBaseQty).HasPrecision(18, 8);
+            modelBuilder.Entity<Order>().Property(p => p.ExpectedQuoteQty).HasPrecision(18, 8);
+            modelBuilder.Entity<Order>().Property(p => p.ReceivedQuoteQty).HasPrecision(18, 8);
+            modelBuilder.Entity<ExchangeOrder>().Property(p => p.BaseQty).HasPrecision(18, 8);
+            modelBuilder.Entity<ExchangeOrder>().Property(p => p.QuoteQty).HasPrecision(18, 8);
+        }
+
         public DbSet<User> Users { get; set; }
 
         public DbSet<QuoteAsset> QuoteAssets { get; set; }

@@ -148,38 +148,45 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                 };
                 _wsAccountInfo.OnMessage += (s, e) =>
                 {
-                    var accountInfoWss = jsonSerializer.Deserialize<AccountInfoWss>(e.Data);
-                    if (accountInfoWss.EventType == "outboundAccountInfo" && accountInfoWss.EventTime > lastAccountEventTime)
+                    try
                     {
-                        _lastAccountInfoTicks = DateTime.UtcNow.Ticks;
-                        _accountInfo = new AccountInfo
-                                            {
-                                                Balances = accountInfoWss.Balances.Select(b => new Balance
-                                                {
-                                                    Asset = b.Asset,
-                                                    Free = b.Free,
-                                                    Locked = b.Locked
-                                                }).ToList(),
-                                                CanTrade = accountInfoWss.CanTrade,
-                                                UpdateTime = accountInfoWss.UpdateTime,
-                                                SellerCommission = accountInfoWss.SellerCommission,
-                                                TakerCommission = accountInfoWss.TakerCommission,
-                                                MakerCommission = accountInfoWss.MakerCommission,
-                                                BuyerCommission = accountInfoWss.BuyerCommission,
-                                                CanDeposit = accountInfoWss.CanDeposit,
-                                                CanWithdraw = accountInfoWss.CanWithdraw
-                                            };
-
-                        if (accountInfoWss.EventTime - lastAccountEventTime > 25 * 60 * 1000)
+                        var accountInfoWss = jsonSerializer.Deserialize<AccountInfoWss>(e.Data);
+                        if (accountInfoWss.EventType == "outboundAccountInfo" && accountInfoWss.EventTime > lastAccountEventTime)
                         {
-                            KeepAliveUserDataStream(listenKey);
-                            lastAccountEventTime = accountInfoWss.EventTime;
+                            _lastAccountInfoTicks = DateTime.UtcNow.Ticks;
+                            _accountInfo = new AccountInfo
+                            {
+                                Balances = accountInfoWss.Balances.Select(b => new Balance
+                                {
+                                    Asset = b.Asset,
+                                    Free = b.Free,
+                                    Locked = b.Locked
+                                }).ToList(),
+                                CanTrade = accountInfoWss.CanTrade,
+                                UpdateTime = accountInfoWss.UpdateTime,
+                                SellerCommission = accountInfoWss.SellerCommission,
+                                TakerCommission = accountInfoWss.TakerCommission,
+                                MakerCommission = accountInfoWss.MakerCommission,
+                                BuyerCommission = accountInfoWss.BuyerCommission,
+                                CanDeposit = accountInfoWss.CanDeposit,
+                                CanWithdraw = accountInfoWss.CanWithdraw
+                            };
+
+                            if (accountInfoWss.EventTime - lastAccountEventTime > 25 * 60 * 1000)
+                            {
+                                KeepAliveUserDataStream(listenKey);
+                                lastAccountEventTime = accountInfoWss.EventTime;
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        //log ex
                     }
                 };
                 _wsAccountInfo.OnError += (s, e) =>
                 {
-                    if (_wsAccountInfo.IsAlive) _wsAccountInfo.Close(CloseStatusCode.ServerError, e.Message);
+                    //log e.Message
                 };
                 _wsAccountInfo.OnClose += (s, e) =>
                 {
@@ -222,10 +229,10 @@ namespace CryptoSwapMaster.BinanceApiAdapter
             ProcessRequest<EmptyResponse>(request, SecurityType.USER_STREAM);
         }
 
-        public bool IsInsufficientQty(string asset, double qty)
+        public bool IsInsufficientQty(string asset, decimal qty)
         {
-            double quoteQty;
-            double baseQty;
+            decimal quoteQty;
+            decimal baseQty;
             var symbol = asset == "USDT" || asset == "BTC" ? "BTCUSDT" : asset + "BTC";
 
             if (asset == "USDT")
@@ -253,66 +260,15 @@ namespace CryptoSwapMaster.BinanceApiAdapter
 
             return false;
         }
-
-        public double GetBestPossibleLotSize(string baseAsset, double baseQty)
-        {
-            if (baseAsset == "USDT")
-            {
-                if (baseQty < 0.01) throw new Exception("Base Qty is too less for an order");
-                baseQty = Math.Round(baseQty - ((baseQty - 0.01) % 0.01), 2);
-            }
-            else
-            {
-                var symbol = baseAsset == "BTC" ? "BTCUSDT" : baseAsset + "BTC";
-                var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
-                var lotSizeFilter = symbolInfo.Filters.FirstOrDefault(x => x.FilterType == FilterType.LOT_SIZE);
-                if (lotSizeFilter != null)
-                {
-                    if (baseQty < lotSizeFilter.MinQty) throw new Exception("Base Qty is too less for an order");
-                    var fraction = (baseQty - lotSizeFilter.MinQty) % lotSizeFilter.StepSize;
-                    if (fraction > lotSizeFilter.StepSize)
-                        baseQty = Math.Round(baseQty - fraction, 8);
-                }
-            }
-
-            return baseQty;
-        }
-
-        private SymbolInfo GetFirstSymbolInPair(string baseAsset, string quoteAsset)
-        {
-            var symbol = "";
-            if (ExchangeInfo.Symbols.Any(x => x.Symbol == baseAsset + quoteAsset))
-            {
-                symbol = baseAsset + quoteAsset;
-            }
-            else if (ExchangeInfo.Symbols.Any(x => x.Symbol == quoteAsset + baseAsset))
-            {
-                symbol = quoteAsset + baseAsset;
-            }
-            else if (baseAsset == "USDT")
-            {
-                symbol = "BTC" + baseAsset;
-            }
-            else if (quoteAsset == "USDT")
-            {
-                symbol = baseAsset + "BTC";
-            }
-            else
-            {
-                symbol = baseAsset + "BTC";
-            }
-
-            return ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
-        }
-
-        public double GetQuote(string baseAsset, string quoteAsset, double baseQty, double takerCommission)
+        
+        public decimal GetQuote(string baseAsset, string quoteAsset, decimal baseQty, decimal takerCommission)
         {
             if (baseAsset == quoteAsset) return baseQty;
             var orders = BuildOrders(baseAsset, quoteAsset, baseQty, takerCommission);
-            return orders.Last().CummulativeQuoteQty;
+            return orders.Last().Side == BinanceOrderSide.BUY ? orders.Last().OrigQty : orders.Last().CummulativeQuoteQty;
         }
 
-        public List<OrderInfo> BuildOrders(string baseAsset, string quoteAsset, double baseQty, double takerCommission)
+        public List<OrderInfo> BuildOrders(string baseAsset, string quoteAsset, decimal baseQty, decimal takerCommission)
         {
             var orders = new List<OrderInfo>();
 
@@ -326,7 +282,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                     Symbol = symbol,
                     Side = BinanceOrderSide.SELL,
                     OrigQty = baseQty,
-                    CummulativeQuoteQty = GetQuote(symbolInfo, BinanceOrderSide.SELL, baseQty, takerCommission)
+                    CummulativeQuoteQty = GetQtyPostSwap(symbolInfo.Symbol, BinanceOrderSide.SELL.ToString(), baseQty, takerCommission)
                 };
                 orders.Add(order);
             }
@@ -339,8 +295,8 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                 {
                     Symbol = symbol,
                     Side = BinanceOrderSide.BUY,
-                    OrigQty = baseQty,
-                    CummulativeQuoteQty = GetQuote(symbolInfo, BinanceOrderSide.BUY, baseQty, takerCommission)
+                    OrigQty = GetQtyPostSwap(symbolInfo.Symbol, BinanceOrderSide.BUY.ToString(), baseQty, takerCommission),
+                    CummulativeQuoteQty = baseQty
                 };
                 orders.Add(order);
             }
@@ -353,8 +309,8 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                 {
                     Symbol = symbol1,
                     Side = BinanceOrderSide.BUY,
-                    OrigQty = baseQty,
-                    CummulativeQuoteQty = GetQuote(symbolInfo1, BinanceOrderSide.BUY, baseQty, takerCommission)
+                    OrigQty = GetQtyPostSwap(symbolInfo1.Symbol, BinanceOrderSide.BUY.ToString(), baseQty, takerCommission),
+                    CummulativeQuoteQty = baseQty
                 };
                 orders.Add(order1);
 
@@ -365,8 +321,8 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                 {
                     Symbol = symbol2,
                     Side = BinanceOrderSide.BUY,
-                    OrigQty = order1.CummulativeQuoteQty,
-                    CummulativeQuoteQty = GetQuote(symbolInfo2, BinanceOrderSide.BUY, order1.CummulativeQuoteQty, takerCommission)
+                    OrigQty = GetQtyPostSwap(symbolInfo2.Symbol, BinanceOrderSide.BUY.ToString(), order1.OrigQty, takerCommission),
+                    CummulativeQuoteQty = order1.OrigQty
                 };
                 orders.Add(order2);
             }
@@ -380,7 +336,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                     Symbol = symbol1,
                     Side = BinanceOrderSide.SELL,
                     OrigQty = baseQty,
-                    CummulativeQuoteQty = GetQuote(symbolInfo1, BinanceOrderSide.SELL, baseQty, takerCommission)
+                    CummulativeQuoteQty = GetQtyPostSwap(symbolInfo1.Symbol, BinanceOrderSide.SELL.ToString(), baseQty, takerCommission)
                 };
                 orders.Add(order1);
 
@@ -392,7 +348,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                     Symbol = symbol2,
                     Side = BinanceOrderSide.SELL,
                     OrigQty = order1.CummulativeQuoteQty,
-                    CummulativeQuoteQty = GetQuote(symbolInfo2, BinanceOrderSide.SELL, order1.CummulativeQuoteQty, takerCommission)
+                    CummulativeQuoteQty = GetQtyPostSwap(symbolInfo2.Symbol, BinanceOrderSide.SELL.ToString(), order1.CummulativeQuoteQty, takerCommission)
                 };
                 orders.Add(order2);
             }
@@ -406,7 +362,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                     Symbol = symbol1,
                     Side = BinanceOrderSide.SELL,
                     OrigQty = baseQty,
-                    CummulativeQuoteQty = GetQuote(symbolInfo1, BinanceOrderSide.SELL, baseQty, takerCommission)
+                    CummulativeQuoteQty = GetQtyPostSwap(symbolInfo1.Symbol, BinanceOrderSide.SELL.ToString(), baseQty, takerCommission)
                 };
                 orders.Add(order1);
 
@@ -417,8 +373,8 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                 {
                     Symbol = symbol2,
                     Side = BinanceOrderSide.BUY,
-                    OrigQty = order1.CummulativeQuoteQty,
-                    CummulativeQuoteQty = GetQuote(symbolInfo2, BinanceOrderSide.BUY, order1.CummulativeQuoteQty, takerCommission)
+                    OrigQty = GetQtyPostSwap(symbolInfo2.Symbol, BinanceOrderSide.BUY.ToString(), order1.CummulativeQuoteQty, takerCommission),
+                    CummulativeQuoteQty = order1.CummulativeQuoteQty
                 };
                 orders.Add(order2);
             }
@@ -426,44 +382,62 @@ namespace CryptoSwapMaster.BinanceApiAdapter
             return orders;
         }
 
-        private double GetQuote(SymbolInfo symbolInfo, BinanceOrderSide orderSide, double baseQty, double takerCommission)
+        public decimal GetQtyPostSwap(string symbol, string orderSide, decimal quoteQty, decimal takerCommission)
         {
-            var quoteQty = 0.0;
-            var commissionFactor = (10000 - takerCommission) / 10000;
+            decimal orderQty = 0M;
+            decimal commissionFactor = (10000 - takerCommission) / 10000;
 
-            var symbolOrdersInfo = GetOrders(symbolInfo.Symbol);
+            var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
+            var symbolOrdersInfo = GetMarketOrders(symbol);
 
-            if (orderSide == BinanceOrderSide.BUY)
+            if (orderSide == BinanceOrderSide.BUY.ToString())
             {
                 foreach (var ask in symbolOrdersInfo.AskOrders)
                 {
-                    if (baseQty <= ask.Qty * ask.Price)
+                    if (quoteQty <= ask.Qty * ask.Price)
                     {
-                        quoteQty += Math.Round(baseQty / ask.Price * commissionFactor, symbolInfo.BaseAssetPrecision);
+                        orderQty += Math.Round(quoteQty / ask.Price * commissionFactor, symbolInfo.BaseAssetPrecision);
                         break;
                     }
-                    baseQty -= Math.Round(ask.Qty * ask.Price, symbolInfo.BaseAssetPrecision);
-                    quoteQty += ask.Qty * commissionFactor;
+                    quoteQty -= Math.Round(ask.Qty * ask.Price, symbolInfo.BaseAssetPrecision);
+                    orderQty += ask.Qty * commissionFactor;
                 }
             }
             else
             {
                 foreach (var bid in symbolOrdersInfo.BidOrders)
                 {
-                    if (baseQty <= bid.Qty)
+                    if (quoteQty <= bid.Qty)
                     {
-                        quoteQty += Math.Round(baseQty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
+                        orderQty += Math.Round(quoteQty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
                         break;
                     }
-                    baseQty -= bid.Qty;
-                    quoteQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
+                    quoteQty -= bid.Qty;
+                    orderQty += Math.Round(bid.Qty * bid.Price * commissionFactor, symbolInfo.QuotePrecision);
                 }
             }
 
-            return quoteQty;
+            return orderQty;
         }
 
-        private SymbolOrdersInfo GetOrders(string symbol)
+        public decimal GetBestPossibleLotSize(string symbol, decimal baseQty)
+        {
+            var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
+            if (symbolInfo == null) return baseQty;
+
+            var lotSizeFilter = symbolInfo.Filters.FirstOrDefault(x => x.FilterType == FilterType.LOT_SIZE);
+            if (lotSizeFilter == null) return baseQty;
+
+            if (baseQty < lotSizeFilter.MinQty) return 0M;
+
+            var fraction = (baseQty - lotSizeFilter.MinQty) % lotSizeFilter.StepSize;
+            if (fraction > 0M)
+                baseQty = Math.Round(baseQty - fraction, 8);
+
+            return baseQty;
+        }
+
+        private SymbolOrdersInfo GetMarketOrders(string symbol)
         {
             if (_orderBook.ContainsKey(symbol)) return _orderBook[symbol];
             Task.Run(() => GetOrdersWss(symbol));
@@ -511,7 +485,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter
             }
         }
 
-        private double GetPrice(string symbol)
+        private decimal GetPrice(string symbol)
         {
             var request = new RestRequest("/api/v3/ticker/price", Method.GET, DataFormat.Json);
             request.AddParameter("symbol", symbol);
@@ -519,7 +493,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter
             return symbolInfo.Price;
         }
 
-        public OrderInfo NewMarketOrder(string symbol, string side, double quantity)
+        public OrderInfo NewMarketOrder(string symbol, string side, decimal quantity)
         {
             var request = new RestRequest("/api/v3/order", Method.POST, DataFormat.Json);
             request.AddParameter("symbol", symbol);

@@ -30,9 +30,10 @@ namespace CryptoSwapMaster.Data.Entities
         public string Side { get; set; }
 
         [Required]
-        public double BaseQty { get; set; }
+        public decimal BaseQty { get; set; }
 
-        public double? QuoteQty { get; set; }
+        [Required]
+        public decimal QuoteQty { get; set; }
 
         [Required]
         public OrderStatus Status { get; set; }

@@ -8,10 +8,10 @@ namespace CryptoSwapMaster.BinanceApiAdapter.Types
 {
     public class Bid
     {
-        public double Price { get; }
-        public double Qty { get; }
+        public decimal Price { get; }
+        public decimal Qty { get; }
 
-        public Bid(double price, double qty)
+        public Bid(decimal price, decimal qty)
         {
             Price = price;
             Qty = qty;

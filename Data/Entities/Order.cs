@@ -29,15 +29,17 @@ namespace CryptoSwapMaster.Data.Entities
         public string BaseAsset { get; set; }
 
         [Required]
+        public decimal BaseQty { get; set; }
+
+        public decimal? ExecutedBaseQty { get; set; }
+
+        [Required]
         public string QuoteAsset { get; set; }
 
         [Required]
-        public double BaseQty { get; set; }
+        public decimal ExpectedQuoteQty { get; set; }
 
-        [Required]
-        public double ExpectedQuoteQty { get; set; }
-
-        public double? ReceivedQuoteQty { get; set; }
+        public decimal? ReceivedQuoteQty { get; set; }
 
         [Required]
         public OrderStatus Status { get; set; }

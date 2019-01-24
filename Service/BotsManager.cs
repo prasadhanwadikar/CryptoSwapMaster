@@ -188,6 +188,7 @@ namespace CryptoSwapMaster.Service
                                             Symbol = orderPart.Symbol,
                                             Side = orderPart.Side.ToString(),
                                             BaseQty = orderPart.OrigQty,
+                                            QuoteQty = orderPart.CummulativeQuoteQty,
                                             Status = OrderStatus.Open,
                                             Created = DateTime.Now
                                         };
@@ -242,16 +243,21 @@ namespace CryptoSwapMaster.Service
                     }
 
                     var accountInfo = b.Binance.AccountInfo;
-
+                    
                     Parallel.ForEach(orders, (order) =>
                     {
+                        var numExchangeOrders = order.ExchangeOrders.Count;
                         foreach (var exchangeOrder in order.ExchangeOrders.OrderBy(x => x.Sequence))
                         {
-                            var binanceOrderInfo = new OrderInfo { Status = BinanceOrderStatus.NEW };
+                            OrderInfo binanceOrderInfo = null;
                             try
                             {
                                 if (exchangeOrder.Status == OrderStatus.Open)
                                 {
+                                    if (exchangeOrder.Side == "BUY")
+                                        exchangeOrder.BaseQty = b.Binance.GetQtyPostSwap(exchangeOrder.Symbol, exchangeOrder.Side, exchangeOrder.QuoteQty, accountInfo.TakerCommission);
+
+                                    exchangeOrder.BaseQty = b.Binance.GetBestPossibleLotSize(exchangeOrder.Symbol, exchangeOrder.BaseQty);
                                     binanceOrderInfo = b.Binance.NewMarketOrder(exchangeOrder.Symbol, exchangeOrder.Side, exchangeOrder.BaseQty);
                                     exchangeOrder.ExchangeOrderId = binanceOrderInfo.ClientOrderId;
                                     exchangeOrder.Status = OrderStatus.InProcess;
@@ -268,21 +274,26 @@ namespace CryptoSwapMaster.Service
                                 exchangeOrder.StatusMsg = bex.Msg;
                             }
 
-                            if (binanceOrderInfo.Status == BinanceOrderStatus.FILLED)
+                            if (binanceOrderInfo != null)
                             {
-                                exchangeOrder.QuoteQty = binanceOrderInfo.CummulativeQuoteQty;
-                                exchangeOrder.Status = OrderStatus.Completed;
-                                exchangeOrder.StatusMsg = null;
+                                if (binanceOrderInfo.Status == BinanceOrderStatus.FILLED)
+                                {
+                                    exchangeOrder.BaseQty = binanceOrderInfo.ExecutedQty;
+                                    exchangeOrder.QuoteQty = binanceOrderInfo.CummulativeQuoteQty;
+                                    exchangeOrder.Status = OrderStatus.Completed;
+                                    exchangeOrder.StatusMsg = null;
+                                }
+                                else if (binanceOrderInfo.Status == (BinanceOrderStatus.CANCELED | BinanceOrderStatus.EXPIRED | BinanceOrderStatus.REJECTED))
+                                {
+                                    exchangeOrder.Status = OrderStatus.Cancelled;
+                                    exchangeOrder.StatusMsg = binanceOrderInfo.Status.ToString() + " by Binance";
+                                }
                             }
-                            else if (binanceOrderInfo.Status == (BinanceOrderStatus.CANCELED | BinanceOrderStatus.EXPIRED | BinanceOrderStatus.REJECTED))
-                            {
-                                exchangeOrder.Status = OrderStatus.Cancelled;
-                                exchangeOrder.StatusMsg = binanceOrderInfo.Status.ToString() + " by Binance";
-                            }
-
+                            
                             db.UpdateExchangeOrder(exchangeOrder);
 
-                            if (binanceOrderInfo.Status != BinanceOrderStatus.FILLED) break;
+                            if (binanceOrderInfo == null || binanceOrderInfo.Status != BinanceOrderStatus.FILLED)
+                                break;
                         }
                     });
                 }
