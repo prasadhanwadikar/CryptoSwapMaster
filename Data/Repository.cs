@@ -181,7 +181,7 @@ namespace CryptoSwapMaster.Data
                 foreach (var order in orders)
                 {
                     order.Status = OrderStatus.Cancelled;
-                    order.StatusMsg = "Base asset free balance found insufficient for the specified groups of orders";
+                    order.StatusMsg = "Base asset free balance found to be insufficient";
                     order.LastModified = DateTime.Now;
                 }
 

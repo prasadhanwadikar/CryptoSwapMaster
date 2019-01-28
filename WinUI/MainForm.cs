@@ -547,8 +547,7 @@ namespace CryptoSwapMaster.WinUI
                 if (status != "All")
                     orders = orders.Where(x => x.Status.ToString() == status).ToList();
                 
-                orders = orders.OrderBy(x => x.BaseAsset).OrderByDescending(x => x.Pool)
-                    .ThenBy(x => x.Group).ThenBy(x => x.Id).ToList();
+                orders = orders.OrderBy(x => x.BaseAsset).ThenByDescending(x => x.Pool).ThenBy(x => x.Group).ThenBy(x => x.Id).ToList();
 
                 ordersHistoryBindingSource.Clear();
                 foreach (var order in orders)
