@@ -7,8 +7,8 @@
     <ProjectGuid>{1F687F75-549F-44FA-B9B1-91CEDFA1ACC1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BinanceApiAdapter</RootNamespace>
-    <AssemblyName>BinanceApiAdapter</AssemblyName>
+    <RootNamespace>CryptoSwapMaster.BinanceApiAdapter</RootNamespace>
+    <AssemblyName>CryptoSwapMaster.BinanceApiAdapter</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -82,6 +82,7 @@
     <Compile Include="Types\ServerTime.cs" />
     <Compile Include="Types\SymbolInfo.cs" />
     <Compile Include="Types\UserDataStream.cs" />
+    <Compile Include="Types\UserStreamPayloadType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

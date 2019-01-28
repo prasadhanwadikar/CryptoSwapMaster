@@ -530,8 +530,8 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
-                var baseAsset = cbBaseAsset2.SelectedItem.ToString();
-                var status = cbOrderStatus.SelectedItem.ToString();
+                var baseAsset = cbBaseAsset2.SelectedItem == null ? "All" : cbBaseAsset2.SelectedItem.ToString();
+                var status = cbOrderStatus.SelectedItem == null ? "All" : cbOrderStatus.SelectedItem.ToString();
 
                 var orders = _db.GetOrders(_user.Id);
 

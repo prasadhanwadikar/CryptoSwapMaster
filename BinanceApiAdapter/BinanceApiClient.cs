@@ -150,8 +150,10 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                 {
                     try
                     {
+                        var payload = jsonSerializer.Deserialize<UserStreamPayloadType>(e.Data);
+                        if (payload.EventType != "outboundAccountInfo") return;
                         var accountInfoWss = jsonSerializer.Deserialize<AccountInfoWss>(e.Data);
-                        if (accountInfoWss.EventType == "outboundAccountInfo" && accountInfoWss.EventTime > lastAccountEventTime)
+                        if (accountInfoWss.EventTime > lastAccountEventTime)
                         {
                             _lastAccountInfoTicks = DateTime.UtcNow.Ticks;
                             _accountInfo = new AccountInfo
