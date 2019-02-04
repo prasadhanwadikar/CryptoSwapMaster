@@ -173,7 +173,7 @@ namespace CryptoSwapMaster.WinUI
 
                 if (cbBaseAsset.Items.Contains(_baseAsset))
                     cbBaseAsset.SelectedItem = _baseAsset;
-                else
+                else if (cbBaseAsset.Items.Count > 0)
                     cbBaseAsset.SelectedIndex = 0;
 
                 if (clbQuoteAssets.Items.Count != _allAssets.Count)
