@@ -26,6 +26,9 @@ namespace CryptoSwapMaster.Data.Entities
         public int Group { get; set; }
 
         [Required]
+        public string Type { get; set; }
+
+        [Required]
         public string BaseAsset { get; set; }
 
         [Required]

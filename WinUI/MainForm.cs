@@ -37,6 +37,7 @@ namespace CryptoSwapMaster.WinUI
         private decimal _baseAssetFreeBalance = 0M;
         private int _pool = 0;
         private int _group = 0;
+        private string _type = "";
         private string _quoteAsset = string.Empty;
         private decimal _baseQty = 0M;
         private decimal _quoteQty = 0M;
@@ -84,6 +85,7 @@ namespace CryptoSwapMaster.WinUI
 
                 cbBaseAsset2.SelectedIndex = 0;
                 cbOrderStatus.SelectedIndex = 0;
+                cbType.SelectedIndex = 0;
 
                 LoadDashboard();
             }
@@ -312,6 +314,18 @@ namespace CryptoSwapMaster.WinUI
             }
         }
 
+        private void cbType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                _type = cbType.SelectedItem.ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void cbQuoteAsset_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
@@ -398,7 +412,20 @@ namespace CryptoSwapMaster.WinUI
                 }
                 else
                 {
-                    if (_quoteQty <= 0M) throw new Exception("Invalid Quote Qty");
+                    if (_quoteQty <= 0M)
+                    {
+                        throw new Exception("Invalid Quote Qty");
+                    }
+
+                    var isLimitOrder = _type == "Limit";
+                    if (!isLimitOrder) //Stop Loss order
+                    {
+                        var quote = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission);
+                        if (_quoteQty >= quote)
+                        {
+                            throw new Exception("Quote Qty for Stop Loss order must be less than current market price " + quote);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -416,7 +443,7 @@ namespace CryptoSwapMaster.WinUI
             try
             {
                 ValidateOrder(setQuoteQty: false);
-                _db.AddOrder(_user.Id, _baseAsset, _pool, _group, _baseQty, _quoteAsset, _quoteQty);
+                _db.AddOrder(_user.Id, _baseAsset, _pool, _group, _type, _baseQty, _quoteAsset, _quoteQty);
                 tbBaseQty.Text = "";
                 _baseQty = 0M;
                 tbQuoteQty.Text = "";

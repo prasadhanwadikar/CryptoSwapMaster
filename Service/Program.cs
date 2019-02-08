@@ -16,7 +16,7 @@ namespace CryptoSwapMaster.Service
         {
             var botsManager = new BotsManager();
             botsManager.Start();
-            Console.Read();
+            Console.ReadKey();
             botsManager.Stop();
 
             //if (true || System.Diagnostics.Debugger.IsAttached)

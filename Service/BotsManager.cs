@@ -158,7 +158,8 @@ namespace CryptoSwapMaster.Service
                                 foreach (var order in groupOrdersGroup)
                                 {
                                     var quote = b.Binance.GetQuote(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
-                                    if (quote < order.ExpectedQuoteQty)
+                                    var isLimitOrder = order.Type == "Limit"; //false means StopLoss order
+                                    if ((isLimitOrder && quote < order.ExpectedQuoteQty) || (!isLimitOrder && quote > order.ExpectedQuoteQty))
                                     {
                                         selectGroup = false;
                                         break;

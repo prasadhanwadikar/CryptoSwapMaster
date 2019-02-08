@@ -118,7 +118,7 @@ namespace CryptoSwapMaster.Data
             }
         }
 
-        public void AddOrder(int userId, string baseAsset, int pool, int group, decimal baseQty, string quoteAsset, decimal quoteQty)
+        public void AddOrder(int userId, string baseAsset, int pool, int group, string type, decimal baseQty, string quoteAsset, decimal quoteQty)
         {
             using (var context = new Context())
             {
@@ -142,6 +142,7 @@ namespace CryptoSwapMaster.Data
                     BaseAsset = baseAsset,
                     Pool = pool,
                     Group = group,
+                    Type = type,
                     BaseQty = baseQty,
                     QuoteAsset = quoteAsset,
                     ExpectedQuoteQty = quoteQty,
