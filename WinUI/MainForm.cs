@@ -198,30 +198,26 @@ namespace CryptoSwapMaster.WinUI
             switch (_user.BotStatus)
             {
                 case BotStatus.StartRequested:
-                    lblBotStatus.Text = "Starting ...";
-                    lblBotStatus.ForeColor = Color.Blue;
-                    btnChangeBotStatus.Text = "Stop Bot";
+                    btnChangeBotStatus.Text = "BOT: Starting ...";
+                    btnChangeBotStatus.ForeColor = Color.Blue;
                     btnChangeBotStatus.Enabled = false;
                     break;
 
                 case BotStatus.Running:
-                    lblBotStatus.Text = "ON";
-                    lblBotStatus.ForeColor = Color.Green;
-                    btnChangeBotStatus.Text = "Stop Bot";
+                    btnChangeBotStatus.Text = "BOT: ON";
+                    btnChangeBotStatus.ForeColor = Color.Green;
                     btnChangeBotStatus.Enabled = true;
                     break;
 
                 case BotStatus.StopRequested:
-                    lblBotStatus.Text = "Stopping ...";
-                    lblBotStatus.ForeColor = Color.Blue;
-                    btnChangeBotStatus.Text = "Start Bot";
+                    btnChangeBotStatus.Text = "BOT: Stopping ...";
+                    btnChangeBotStatus.ForeColor = Color.Blue;
                     btnChangeBotStatus.Enabled = false;
                     break;
 
                 case BotStatus.Stopped:
-                    lblBotStatus.Text = "OFF";
-                    lblBotStatus.ForeColor = Color.Red;
-                    btnChangeBotStatus.Text = "Start Bot";
+                    btnChangeBotStatus.Text = "BOT: OFF";
+                    btnChangeBotStatus.ForeColor = Color.Red;
                     btnChangeBotStatus.Enabled = true;
                     break;
             }
@@ -260,7 +256,7 @@ namespace CryptoSwapMaster.WinUI
 
             _openOrders = _db.GetOrders(_user.Id, OrderStatus.Open)
                 .Where(x => x.BaseAsset == _baseAsset)
-                .OrderBy(x => x.Pool).ThenBy(x => x.Group).ThenBy(x => x.Id)
+                .OrderBy(x => x.Pool).ThenBy(x => x.Id)
                 .ToList();
 
             openOrdersBindingSource.Clear();
@@ -275,7 +271,7 @@ namespace CryptoSwapMaster.WinUI
 
             if (cbPool.Items.Contains(_pool))
                 cbPool.SelectedItem = _pool;
-            else
+            else if (cbPool.Items.Count > 0)
                 cbPool.SelectedIndex = 0;
         }
 
@@ -284,29 +280,6 @@ namespace CryptoSwapMaster.WinUI
             try
             {
                 _pool = cbPool.SelectedItem.ToString() == "New" ? 0 : Convert.ToInt32(cbPool.SelectedItem);
-
-                cbGroup.Items.Clear();
-                cbGroup.Items.Add("New");
-                var groups = _openOrders.Where(x => x.Pool == _pool).Select(x => x.Group);
-                foreach (var group in groups)
-                    cbGroup.Items.Add(group);
-
-                if (cbGroup.Items.Contains(_group))
-                    cbGroup.SelectedItem = _group;
-                else
-                    cbGroup.SelectedIndex = 0;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void cbGroup_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                _group = cbGroup.SelectedItem.ToString() == "New" ? 0 : Convert.ToInt32(cbGroup.SelectedItem);
             }
             catch (Exception ex)
             {
@@ -382,59 +355,55 @@ namespace CryptoSwapMaster.WinUI
 
         private void ValidateOrder(bool setQuoteQty = true)
         {
-            try
+            if (string.IsNullOrEmpty(_baseAsset)) throw new Exception("Missing Base Asset");
+
+            if (_baseAsset == _quoteAsset) throw new Exception("Base and Quote Asset should be different");
+
+            if (_binance.IsInsufficientQty(_baseAsset, _baseQty))
             {
-                if (string.IsNullOrEmpty(_baseAsset)) throw new Exception("Missing Base Asset");
-
-                if (_baseAsset == _quoteAsset) throw new Exception("Base and Quote Asset should be different");
-
-                if (_binance.IsInsufficientQty(_baseAsset, _baseQty))
-                    throw new Exception("Base Qty is too less for an order");
-
-                var symbol = _baseAsset == "BTC" || _baseAsset == "USDT" ? "BTCUSDT" : _baseAsset + "BTC";
-                _baseQty = _binance.GetBestPossibleLotSize(symbol, _baseQty);
-                tbBaseQty.Text = _baseQty.ToString();
-
-                var groupSum = _openOrders.Where(x => x.Pool == _pool && x.Group == _group).Sum(x => x.BaseQty);
-
-                var otherPoolsMaxQtySum = _openOrders.Where(x => x.Pool != _pool)
-                    .GroupBy(x => x.Pool).Sum(x => x.GroupBy(y => y.Group).Max(y => y.Sum(z => z.BaseQty)));
-
-                var maxPossibleBaseQty = _baseAssetFreeBalance - otherPoolsMaxQtySum - groupSum;
-
-                if (_baseQty > maxPossibleBaseQty)
-                    throw new Exception("Maximum available Base Qty for this order is " + maxPossibleBaseQty);
-
-                if (setQuoteQty)
-                {
-                    _quoteQty = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission);
-                    tbQuoteQty.Text = _quoteQty.ToString();
-                }
-                else
-                {
-                    if (_quoteQty <= 0M)
-                    {
-                        throw new Exception("Invalid Quote Qty");
-                    }
-
-                    var isLimitOrder = _type == "Limit";
-                    if (!isLimitOrder) //Stop Loss order
-                    {
-                        var quote = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission);
-                        if (_quoteQty >= quote)
-                        {
-                            throw new Exception("Quote Qty for Stop Loss order must be less than current market price " + quote);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                tbBaseQty.Text = "";
                 _baseQty = 0M;
-                tbQuoteQty.Text = "";
-                _quoteQty = 0M;
-                throw ex;
+                tbBaseQty.Text = "";
+                throw new Exception("Base Qty is too less for an order");
+            }
+
+            var symbol = _baseAsset == "BTC" || _baseAsset == "USDT" ? "BTCUSDT" : _baseAsset + "BTC";
+            _baseQty = _binance.GetBestPossibleLotSize(symbol, _baseQty);
+            tbBaseQty.Text = _baseQty.ToString();
+
+            var otherPoolsMaxQtySum = _openOrders.Where(x => x.Pool != _pool).GroupBy(x => x.Pool).Sum(y => y.Max(z => z.BaseQty));
+            var maxPossibleBaseQty = _baseAssetFreeBalance - otherPoolsMaxQtySum;
+            if (_baseQty > maxPossibleBaseQty)
+            {
+                _baseQty = maxPossibleBaseQty;
+                tbBaseQty.Text = maxPossibleBaseQty.ToString();
+                throw new Exception("Maximum available Base Qty for this order is " + maxPossibleBaseQty);
+            }
+
+            if (setQuoteQty)
+            {
+                _quoteQty = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission);
+                tbQuoteQty.Text = _quoteQty.ToString();
+            }
+            else
+            {
+                if (_quoteQty <= 0M)
+                {
+                    _quoteQty = 0M;
+                    tbQuoteQty.Text = "";
+                    throw new Exception("Invalid Quote Qty");
+                }
+
+                var isLimitOrder = _type == "Limit";
+                if (!isLimitOrder) //Stop Loss order
+                {
+                    var quote = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission);
+                    if (_quoteQty >= quote)
+                    {
+                        _quoteQty = 0M;
+                        tbQuoteQty.Text = "";
+                        throw new Exception("Quote Qty for Stop Loss order must be less than current market price " + quote);
+                    }
+                }
             }
         }
 
@@ -574,7 +543,7 @@ namespace CryptoSwapMaster.WinUI
                 if (status != "All")
                     orders = orders.Where(x => x.Status.ToString() == status).ToList();
                 
-                orders = orders.OrderBy(x => x.BaseAsset).ThenByDescending(x => x.Pool).ThenBy(x => x.Group).ThenBy(x => x.Id).ToList();
+                orders = orders.OrderBy(x => x.BaseAsset).ThenByDescending(x => x.Pool).ThenBy(x => x.Id).ToList();
 
                 ordersHistoryBindingSource.Clear();
                 foreach (var order in orders)
@@ -590,7 +559,7 @@ namespace CryptoSwapMaster.WinUI
         {
             try
             {
-                _user.BotStatus = btnChangeBotStatus.Text == "Start Bot" ? BotStatus.StartRequested : BotStatus.StopRequested;
+                _user.BotStatus = btnChangeBotStatus.Text == "BOT: OFF" ? BotStatus.StartRequested : BotStatus.StopRequested;
                _db.UpdateBotStatus(_user.Id, _user.BotStatus);
                UpdateBotStatus();
             }

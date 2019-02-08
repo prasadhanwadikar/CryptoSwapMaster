@@ -129,19 +129,11 @@ namespace CryptoSwapMaster.Data
                     else pool = 1;
                 }
 
-                if (group == 0)
-                {
-                    var poolOrders = context.Orders.Where(x => x.UserId == userId && x.BaseAsset == baseAsset && x.Pool == pool);
-                    if (poolOrders.Any()) group = poolOrders.Max(x => x.Group) + 1;
-                    else group = 1;
-                }
-
                 var order = new Order
                 {
                     UserId = userId,
                     BaseAsset = baseAsset,
                     Pool = pool,
-                    Group = group,
                     Type = type,
                     BaseQty = baseQty,
                     QuoteAsset = quoteAsset,
@@ -190,21 +182,21 @@ namespace CryptoSwapMaster.Data
             }
         }
 
-        public void MarkGroupOrdersInProcess(int userId, string baseAsset, int pool, int group)
+        public void MarkPoolOrderInProcess(int userId, string baseAsset, int pool, int orderId)
         {
             using (var context = new Context())
             {
                 var poolOrders = context.Orders.Where(x => x.UserId == userId && x.Status == OrderStatus.Open && x.BaseAsset == baseAsset && x.Pool == pool);
                 foreach (var order in poolOrders)
                 {
-                    if (order.Group == group)
+                    if (order.Id == orderId)
                     {
                         order.Status = OrderStatus.InProcess;
                     }
                     else
                     {
                         order.Status = OrderStatus.Cancelled;
-                        order.StatusMsg = "Other specified option of order(s) got matched";
+                        order.StatusMsg = "Some other order from this pool got matched";
                     }
 
                     order.LastModified = DateTime.Now;

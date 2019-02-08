@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tcSections = new System.Windows.Forms.TabControl();
             this.tpDashboard = new System.Windows.Forms.TabPage();
             this.splitDashboard = new System.Windows.Forms.SplitContainer();
@@ -40,23 +40,37 @@
             this.pnlOrders = new System.Windows.Forms.Panel();
             this.pnlOpenOrders = new System.Windows.Forms.Panel();
             this.dgOpenOrders = new System.Windows.Forms.DataGridView();
+            this.idDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.userIdDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.poolDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.baseAssetDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.baseQtyDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ExecutedBaseQty = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.quoteAssetDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.expectedQuoteQtyDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.receivedQuoteQtyDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.statusDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.statusMsgDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.createdDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lastModifiedDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Action = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.openOrdersBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.pnlNewOrder = new System.Windows.Forms.Panel();
             this.tableOpenOrders = new System.Windows.Forms.TableLayoutPanel();
             this.cbPool = new System.Windows.Forms.ComboBox();
             this.tbQuoteQty = new System.Windows.Forms.TextBox();
-            this.cbGroup = new System.Windows.Forms.ComboBox();
             this.lblAction = new System.Windows.Forms.Label();
             this.lblQuoteQty = new System.Windows.Forms.Label();
-            this.lblGroup = new System.Windows.Forms.Label();
             this.lblPool = new System.Windows.Forms.Label();
             this.btnAdd = new System.Windows.Forms.Button();
             this.lblBaseQty = new System.Windows.Forms.Label();
             this.lblQuoteAsset = new System.Windows.Forms.Label();
             this.tbBaseQty = new System.Windows.Forms.TextBox();
             this.cbQuoteAsset = new System.Windows.Forms.ComboBox();
+            this.lblType = new System.Windows.Forms.Label();
+            this.cbType = new System.Windows.Forms.ComboBox();
             this.pnlBaseAssetInfo = new System.Windows.Forms.Panel();
-            this.lblBot = new System.Windows.Forms.Label();
-            this.lblBotStatus = new System.Windows.Forms.Label();
             this.btnChangeBotStatus = new System.Windows.Forms.Button();
             this.lblOpenOrders = new System.Windows.Forms.Label();
             this.lblFreeBalValue = new System.Windows.Forms.Label();
@@ -66,6 +80,19 @@
             this.tpOrdersHistory = new System.Windows.Forms.TabPage();
             this.pnlOrdersHistory = new System.Windows.Forms.Panel();
             this.dgOrdersHistory = new System.Windows.Forms.DataGridView();
+            this.baseAssetDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.poolDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.baseQtyDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.quoteAssetDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.expectedQuoteQtyDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.receivedQuoteQtyDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.statusDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.statusMsgDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.createdDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lastModifiedDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ordersHistoryBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.pnlFilters = new System.Windows.Forms.Panel();
             this.cbOrderStatus = new System.Windows.Forms.ComboBox();
             this.lblOrderStatus = new System.Windows.Forms.Label();
@@ -87,39 +114,6 @@
             this.lblApiKey = new System.Windows.Forms.Label();
             this.pnlStatusBar = new System.Windows.Forms.Panel();
             this.pnlTabControl = new System.Windows.Forms.Panel();
-            this.openOrdersBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.ordersHistoryBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.baseAssetDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.poolDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.groupDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.baseQtyDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.quoteAssetDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.expectedQuoteQtyDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.receivedQuoteQtyDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.statusDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.statusMsgDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.createdDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.lastModifiedDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.lblType = new System.Windows.Forms.Label();
-            this.cbType = new System.Windows.Forms.ComboBox();
-            this.idDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.userIdDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.poolDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.groupDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.baseAssetDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.baseQtyDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ExecutedBaseQty = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.quoteAssetDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.expectedQuoteQtyDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.receivedQuoteQtyDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.statusDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.statusMsgDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.createdDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.lastModifiedDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Action = new System.Windows.Forms.DataGridViewButtonColumn();
             this.tcSections.SuspendLayout();
             this.tpDashboard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitDashboard)).BeginInit();
@@ -130,17 +124,17 @@
             this.pnlOrders.SuspendLayout();
             this.pnlOpenOrders.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgOpenOrders)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.openOrdersBindingSource)).BeginInit();
             this.pnlNewOrder.SuspendLayout();
             this.tableOpenOrders.SuspendLayout();
             this.pnlBaseAssetInfo.SuspendLayout();
             this.tpOrdersHistory.SuspendLayout();
             this.pnlOrdersHistory.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgOrdersHistory)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ordersHistoryBindingSource)).BeginInit();
             this.pnlFilters.SuspendLayout();
             this.tpSettings.SuspendLayout();
             this.pnlTabControl.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.openOrdersBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ordersHistoryBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // tcSections
@@ -202,14 +196,14 @@
             this.dgBalance.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgBalance.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Raised;
             this.dgBalance.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgBalance.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgBalance.DefaultCellStyle = dataGridViewCellStyle1;
             this.dgBalance.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgBalance.GridColor = System.Drawing.Color.White;
             this.dgBalance.Location = new System.Drawing.Point(0, 0);
@@ -259,7 +253,6 @@
             this.idDataGridViewTextBoxColumn,
             this.userIdDataGridViewTextBoxColumn,
             this.poolDataGridViewTextBoxColumn,
-            this.groupDataGridViewTextBoxColumn,
             this.dataGridViewTextBoxColumn2,
             this.baseAssetDataGridViewTextBoxColumn,
             this.baseQtyDataGridViewTextBoxColumn,
@@ -273,14 +266,14 @@
             this.lastModifiedDataGridViewTextBoxColumn,
             this.Action});
             this.dgOpenOrders.DataSource = this.openOrdersBindingSource;
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.Color.Transparent;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgOpenOrders.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.Transparent;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgOpenOrders.DefaultCellStyle = dataGridViewCellStyle3;
             this.dgOpenOrders.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgOpenOrders.GridColor = System.Drawing.Color.White;
             this.dgOpenOrders.Location = new System.Drawing.Point(0, 0);
@@ -289,14 +282,156 @@
             this.dgOpenOrders.Name = "dgOpenOrders";
             this.dgOpenOrders.ReadOnly = true;
             this.dgOpenOrders.RowHeadersVisible = false;
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.dgOpenOrders.RowsDefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.dgOpenOrders.RowsDefaultCellStyle = dataGridViewCellStyle4;
             this.dgOpenOrders.RowTemplate.Height = 28;
             this.dgOpenOrders.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dgOpenOrders.Size = new System.Drawing.Size(1214, 251);
             this.dgOpenOrders.TabIndex = 8;
             this.dgOpenOrders.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgOpenOrders_CellClick);
+            // 
+            // idDataGridViewTextBoxColumn
+            // 
+            this.idDataGridViewTextBoxColumn.DataPropertyName = "Id";
+            this.idDataGridViewTextBoxColumn.HeaderText = "Id";
+            this.idDataGridViewTextBoxColumn.Name = "idDataGridViewTextBoxColumn";
+            this.idDataGridViewTextBoxColumn.ReadOnly = true;
+            this.idDataGridViewTextBoxColumn.Visible = false;
+            // 
+            // userIdDataGridViewTextBoxColumn
+            // 
+            this.userIdDataGridViewTextBoxColumn.DataPropertyName = "UserId";
+            this.userIdDataGridViewTextBoxColumn.HeaderText = "UserId";
+            this.userIdDataGridViewTextBoxColumn.Name = "userIdDataGridViewTextBoxColumn";
+            this.userIdDataGridViewTextBoxColumn.ReadOnly = true;
+            this.userIdDataGridViewTextBoxColumn.Visible = false;
+            // 
+            // poolDataGridViewTextBoxColumn
+            // 
+            this.poolDataGridViewTextBoxColumn.DataPropertyName = "Pool";
+            this.poolDataGridViewTextBoxColumn.HeaderText = "Pool";
+            this.poolDataGridViewTextBoxColumn.MinimumWidth = 122;
+            this.poolDataGridViewTextBoxColumn.Name = "poolDataGridViewTextBoxColumn";
+            this.poolDataGridViewTextBoxColumn.ReadOnly = true;
+            this.poolDataGridViewTextBoxColumn.Width = 122;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.DataPropertyName = "Type";
+            this.dataGridViewTextBoxColumn2.HeaderText = "Type";
+            this.dataGridViewTextBoxColumn2.MinimumWidth = 151;
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            this.dataGridViewTextBoxColumn2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.dataGridViewTextBoxColumn2.Width = 151;
+            // 
+            // baseAssetDataGridViewTextBoxColumn
+            // 
+            this.baseAssetDataGridViewTextBoxColumn.DataPropertyName = "BaseAsset";
+            this.baseAssetDataGridViewTextBoxColumn.HeaderText = "BaseAsset";
+            this.baseAssetDataGridViewTextBoxColumn.Name = "baseAssetDataGridViewTextBoxColumn";
+            this.baseAssetDataGridViewTextBoxColumn.ReadOnly = true;
+            this.baseAssetDataGridViewTextBoxColumn.Visible = false;
+            // 
+            // baseQtyDataGridViewTextBoxColumn
+            // 
+            this.baseQtyDataGridViewTextBoxColumn.DataPropertyName = "BaseQty";
+            this.baseQtyDataGridViewTextBoxColumn.HeaderText = "Base Qty";
+            this.baseQtyDataGridViewTextBoxColumn.MinimumWidth = 181;
+            this.baseQtyDataGridViewTextBoxColumn.Name = "baseQtyDataGridViewTextBoxColumn";
+            this.baseQtyDataGridViewTextBoxColumn.ReadOnly = true;
+            this.baseQtyDataGridViewTextBoxColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.baseQtyDataGridViewTextBoxColumn.Width = 181;
+            // 
+            // ExecutedBaseQty
+            // 
+            this.ExecutedBaseQty.DataPropertyName = "ExecutedBaseQty";
+            this.ExecutedBaseQty.HeaderText = "Executed Base Qty";
+            this.ExecutedBaseQty.Name = "ExecutedBaseQty";
+            this.ExecutedBaseQty.ReadOnly = true;
+            this.ExecutedBaseQty.Visible = false;
+            // 
+            // quoteAssetDataGridViewTextBoxColumn
+            // 
+            this.quoteAssetDataGridViewTextBoxColumn.DataPropertyName = "QuoteAsset";
+            this.quoteAssetDataGridViewTextBoxColumn.HeaderText = "Quote Asset";
+            this.quoteAssetDataGridViewTextBoxColumn.MinimumWidth = 151;
+            this.quoteAssetDataGridViewTextBoxColumn.Name = "quoteAssetDataGridViewTextBoxColumn";
+            this.quoteAssetDataGridViewTextBoxColumn.ReadOnly = true;
+            this.quoteAssetDataGridViewTextBoxColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.quoteAssetDataGridViewTextBoxColumn.Width = 151;
+            // 
+            // expectedQuoteQtyDataGridViewTextBoxColumn
+            // 
+            this.expectedQuoteQtyDataGridViewTextBoxColumn.DataPropertyName = "ExpectedQuoteQty";
+            this.expectedQuoteQtyDataGridViewTextBoxColumn.HeaderText = "Quote Qty";
+            this.expectedQuoteQtyDataGridViewTextBoxColumn.MinimumWidth = 181;
+            this.expectedQuoteQtyDataGridViewTextBoxColumn.Name = "expectedQuoteQtyDataGridViewTextBoxColumn";
+            this.expectedQuoteQtyDataGridViewTextBoxColumn.ReadOnly = true;
+            this.expectedQuoteQtyDataGridViewTextBoxColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.expectedQuoteQtyDataGridViewTextBoxColumn.Width = 181;
+            // 
+            // receivedQuoteQtyDataGridViewTextBoxColumn
+            // 
+            this.receivedQuoteQtyDataGridViewTextBoxColumn.DataPropertyName = "ReceivedQuoteQty";
+            this.receivedQuoteQtyDataGridViewTextBoxColumn.HeaderText = "ReceivedQuoteQty";
+            this.receivedQuoteQtyDataGridViewTextBoxColumn.Name = "receivedQuoteQtyDataGridViewTextBoxColumn";
+            this.receivedQuoteQtyDataGridViewTextBoxColumn.ReadOnly = true;
+            this.receivedQuoteQtyDataGridViewTextBoxColumn.Visible = false;
+            // 
+            // statusDataGridViewTextBoxColumn
+            // 
+            this.statusDataGridViewTextBoxColumn.DataPropertyName = "Status";
+            this.statusDataGridViewTextBoxColumn.HeaderText = "Status";
+            this.statusDataGridViewTextBoxColumn.Name = "statusDataGridViewTextBoxColumn";
+            this.statusDataGridViewTextBoxColumn.ReadOnly = true;
+            this.statusDataGridViewTextBoxColumn.Visible = false;
+            // 
+            // statusMsgDataGridViewTextBoxColumn
+            // 
+            this.statusMsgDataGridViewTextBoxColumn.DataPropertyName = "StatusMsg";
+            this.statusMsgDataGridViewTextBoxColumn.HeaderText = "StatusMsg";
+            this.statusMsgDataGridViewTextBoxColumn.Name = "statusMsgDataGridViewTextBoxColumn";
+            this.statusMsgDataGridViewTextBoxColumn.ReadOnly = true;
+            this.statusMsgDataGridViewTextBoxColumn.Visible = false;
+            // 
+            // createdDataGridViewTextBoxColumn
+            // 
+            this.createdDataGridViewTextBoxColumn.DataPropertyName = "Created";
+            this.createdDataGridViewTextBoxColumn.HeaderText = "Created";
+            this.createdDataGridViewTextBoxColumn.Name = "createdDataGridViewTextBoxColumn";
+            this.createdDataGridViewTextBoxColumn.ReadOnly = true;
+            this.createdDataGridViewTextBoxColumn.Visible = false;
+            // 
+            // lastModifiedDataGridViewTextBoxColumn
+            // 
+            this.lastModifiedDataGridViewTextBoxColumn.DataPropertyName = "LastModified";
+            this.lastModifiedDataGridViewTextBoxColumn.HeaderText = "LastModified";
+            this.lastModifiedDataGridViewTextBoxColumn.Name = "lastModifiedDataGridViewTextBoxColumn";
+            this.lastModifiedDataGridViewTextBoxColumn.ReadOnly = true;
+            this.lastModifiedDataGridViewTextBoxColumn.Visible = false;
+            // 
+            // Action
+            // 
+            this.Action.DataPropertyName = "Id";
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.Transparent;
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.Transparent;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            this.Action.DefaultCellStyle = dataGridViewCellStyle2;
+            this.Action.HeaderText = "Action";
+            this.Action.MinimumWidth = 116;
+            this.Action.Name = "Action";
+            this.Action.ReadOnly = true;
+            this.Action.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.Action.Text = "Remove";
+            this.Action.UseColumnTextForButtonValue = true;
+            this.Action.Width = 116;
+            // 
+            // openOrdersBindingSource
+            // 
+            this.openOrdersBindingSource.DataSource = typeof(CryptoSwapMaster.Data.Entities.Order);
             // 
             // pnlNewOrder
             // 
@@ -311,28 +446,26 @@
             // 
             this.tableOpenOrders.AutoSize = true;
             this.tableOpenOrders.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
-            this.tableOpenOrders.ColumnCount = 7;
-            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
+            this.tableOpenOrders.ColumnCount = 6;
             this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
             this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
             this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 180F));
             this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
             this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 180F));
-            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 107F));
+            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 116F));
+            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableOpenOrders.Controls.Add(this.cbPool, 0, 1);
-            this.tableOpenOrders.Controls.Add(this.tbQuoteQty, 5, 1);
-            this.tableOpenOrders.Controls.Add(this.cbGroup, 1, 1);
-            this.tableOpenOrders.Controls.Add(this.lblAction, 6, 0);
-            this.tableOpenOrders.Controls.Add(this.lblQuoteQty, 5, 0);
-            this.tableOpenOrders.Controls.Add(this.lblGroup, 1, 0);
+            this.tableOpenOrders.Controls.Add(this.tbQuoteQty, 4, 1);
+            this.tableOpenOrders.Controls.Add(this.lblAction, 5, 0);
+            this.tableOpenOrders.Controls.Add(this.lblQuoteQty, 4, 0);
             this.tableOpenOrders.Controls.Add(this.lblPool, 0, 0);
-            this.tableOpenOrders.Controls.Add(this.btnAdd, 6, 1);
-            this.tableOpenOrders.Controls.Add(this.lblBaseQty, 3, 0);
-            this.tableOpenOrders.Controls.Add(this.lblQuoteAsset, 4, 0);
-            this.tableOpenOrders.Controls.Add(this.tbBaseQty, 3, 1);
-            this.tableOpenOrders.Controls.Add(this.cbQuoteAsset, 4, 1);
-            this.tableOpenOrders.Controls.Add(this.lblType, 2, 0);
-            this.tableOpenOrders.Controls.Add(this.cbType, 2, 1);
+            this.tableOpenOrders.Controls.Add(this.btnAdd, 5, 1);
+            this.tableOpenOrders.Controls.Add(this.lblBaseQty, 2, 0);
+            this.tableOpenOrders.Controls.Add(this.lblQuoteAsset, 3, 0);
+            this.tableOpenOrders.Controls.Add(this.tbBaseQty, 2, 1);
+            this.tableOpenOrders.Controls.Add(this.cbQuoteAsset, 3, 1);
+            this.tableOpenOrders.Controls.Add(this.lblType, 1, 0);
+            this.tableOpenOrders.Controls.Add(this.cbType, 1, 1);
             this.tableOpenOrders.Dock = System.Windows.Forms.DockStyle.Left;
             this.tableOpenOrders.Location = new System.Drawing.Point(0, 0);
             this.tableOpenOrders.Margin = new System.Windows.Forms.Padding(0);
@@ -340,7 +473,7 @@
             this.tableOpenOrders.RowCount = 2;
             this.tableOpenOrders.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableOpenOrders.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
-            this.tableOpenOrders.Size = new System.Drawing.Size(1015, 66);
+            this.tableOpenOrders.Size = new System.Drawing.Size(903, 66);
             this.tableOpenOrders.TabIndex = 6;
             // 
             // cbPool
@@ -349,7 +482,7 @@
             this.cbPool.BackColor = System.Drawing.Color.White;
             this.cbPool.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbPool.FormattingEnabled = true;
-            this.cbPool.Location = new System.Drawing.Point(4, 30);
+            this.cbPool.Location = new System.Drawing.Point(4, 32);
             this.cbPool.Name = "cbPool";
             this.cbPool.Size = new System.Drawing.Size(114, 33);
             this.cbPool.TabIndex = 2;
@@ -358,29 +491,17 @@
             // tbQuoteQty
             // 
             this.tbQuoteQty.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.tbQuoteQty.Location = new System.Drawing.Point(729, 31);
+            this.tbQuoteQty.Location = new System.Drawing.Point(608, 31);
             this.tbQuoteQty.Name = "tbQuoteQty";
             this.tbQuoteQty.Size = new System.Drawing.Size(174, 30);
             this.tbQuoteQty.TabIndex = 6;
             this.tbQuoteQty.Leave += new System.EventHandler(this.tbQuoteQty_Leave);
             // 
-            // cbGroup
-            // 
-            this.cbGroup.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.cbGroup.BackColor = System.Drawing.Color.White;
-            this.cbGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbGroup.FormattingEnabled = true;
-            this.cbGroup.Location = new System.Drawing.Point(125, 30);
-            this.cbGroup.Name = "cbGroup";
-            this.cbGroup.Size = new System.Drawing.Size(114, 33);
-            this.cbGroup.TabIndex = 3;
-            this.cbGroup.SelectedIndexChanged += new System.EventHandler(this.cbGroup_SelectedIndexChanged);
-            // 
             // lblAction
             // 
             this.lblAction.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblAction.AutoSize = true;
-            this.lblAction.Location = new System.Drawing.Point(910, 1);
+            this.lblAction.Location = new System.Drawing.Point(789, 1);
             this.lblAction.Name = "lblAction";
             this.lblAction.Size = new System.Drawing.Size(67, 25);
             this.lblAction.TabIndex = 0;
@@ -391,23 +512,12 @@
             // 
             this.lblQuoteQty.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblQuoteQty.AutoSize = true;
-            this.lblQuoteQty.Location = new System.Drawing.Point(729, 1);
+            this.lblQuoteQty.Location = new System.Drawing.Point(608, 1);
             this.lblQuoteQty.Name = "lblQuoteQty";
             this.lblQuoteQty.Size = new System.Drawing.Size(102, 25);
             this.lblQuoteQty.TabIndex = 0;
             this.lblQuoteQty.Text = "Quote Qty";
             this.lblQuoteQty.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblGroup
-            // 
-            this.lblGroup.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblGroup.AutoSize = true;
-            this.lblGroup.Location = new System.Drawing.Point(125, 1);
-            this.lblGroup.Name = "lblGroup";
-            this.lblGroup.Size = new System.Drawing.Size(66, 25);
-            this.lblGroup.TabIndex = 0;
-            this.lblGroup.Text = "Group";
-            this.lblGroup.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblPool
             // 
@@ -422,10 +532,10 @@
             // 
             // btnAdd
             // 
-            this.btnAdd.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnAdd.Location = new System.Drawing.Point(911, 30);
+            this.btnAdd.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnAdd.Location = new System.Drawing.Point(789, 30);
             this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(99, 32);
+            this.btnAdd.Size = new System.Drawing.Size(110, 32);
             this.btnAdd.TabIndex = 7;
             this.btnAdd.Text = "Add";
             this.btnAdd.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -436,7 +546,7 @@
             // 
             this.lblBaseQty.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblBaseQty.AutoSize = true;
-            this.lblBaseQty.Location = new System.Drawing.Point(397, 1);
+            this.lblBaseQty.Location = new System.Drawing.Point(276, 1);
             this.lblBaseQty.Name = "lblBaseQty";
             this.lblBaseQty.Size = new System.Drawing.Size(93, 25);
             this.lblBaseQty.TabIndex = 0;
@@ -447,7 +557,7 @@
             // 
             this.lblQuoteAsset.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblQuoteAsset.AutoSize = true;
-            this.lblQuoteAsset.Location = new System.Drawing.Point(578, 1);
+            this.lblQuoteAsset.Location = new System.Drawing.Point(457, 1);
             this.lblQuoteAsset.Name = "lblQuoteAsset";
             this.lblQuoteAsset.Size = new System.Drawing.Size(121, 25);
             this.lblQuoteAsset.TabIndex = 0;
@@ -457,7 +567,7 @@
             // tbBaseQty
             // 
             this.tbBaseQty.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.tbBaseQty.Location = new System.Drawing.Point(397, 31);
+            this.tbBaseQty.Location = new System.Drawing.Point(276, 31);
             this.tbBaseQty.Name = "tbBaseQty";
             this.tbBaseQty.Size = new System.Drawing.Size(174, 30);
             this.tbBaseQty.TabIndex = 4;
@@ -469,16 +579,40 @@
             this.cbQuoteAsset.BackColor = System.Drawing.Color.White;
             this.cbQuoteAsset.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbQuoteAsset.FormattingEnabled = true;
-            this.cbQuoteAsset.Location = new System.Drawing.Point(578, 30);
+            this.cbQuoteAsset.Location = new System.Drawing.Point(457, 32);
             this.cbQuoteAsset.Name = "cbQuoteAsset";
             this.cbQuoteAsset.Size = new System.Drawing.Size(144, 33);
             this.cbQuoteAsset.TabIndex = 5;
             this.cbQuoteAsset.SelectedIndexChanged += new System.EventHandler(this.cbQuoteAsset_SelectedIndexChanged);
             // 
+            // lblType
+            // 
+            this.lblType.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblType.AutoSize = true;
+            this.lblType.Location = new System.Drawing.Point(125, 1);
+            this.lblType.Name = "lblType";
+            this.lblType.Size = new System.Drawing.Size(57, 25);
+            this.lblType.TabIndex = 8;
+            this.lblType.Text = "Type";
+            this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // cbType
+            // 
+            this.cbType.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cbType.BackColor = System.Drawing.Color.White;
+            this.cbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbType.FormattingEnabled = true;
+            this.cbType.Items.AddRange(new object[] {
+            "Limit",
+            "Stop Loss"});
+            this.cbType.Location = new System.Drawing.Point(125, 32);
+            this.cbType.Name = "cbType";
+            this.cbType.Size = new System.Drawing.Size(144, 33);
+            this.cbType.TabIndex = 9;
+            this.cbType.SelectedIndexChanged += new System.EventHandler(this.cbType_SelectedIndexChanged);
+            // 
             // pnlBaseAssetInfo
             // 
-            this.pnlBaseAssetInfo.Controls.Add(this.lblBot);
-            this.pnlBaseAssetInfo.Controls.Add(this.lblBotStatus);
             this.pnlBaseAssetInfo.Controls.Add(this.btnChangeBotStatus);
             this.pnlBaseAssetInfo.Controls.Add(this.lblOpenOrders);
             this.pnlBaseAssetInfo.Controls.Add(this.lblFreeBalValue);
@@ -491,34 +625,17 @@
             this.pnlBaseAssetInfo.Size = new System.Drawing.Size(1214, 79);
             this.pnlBaseAssetInfo.TabIndex = 9;
             // 
-            // lblBot
-            // 
-            this.lblBot.AutoSize = true;
-            this.lblBot.Location = new System.Drawing.Point(767, 46);
-            this.lblBot.Name = "lblBot";
-            this.lblBot.Size = new System.Drawing.Size(52, 25);
-            this.lblBot.TabIndex = 22;
-            this.lblBot.Text = "Bot: ";
-            // 
-            // lblBotStatus
-            // 
-            this.lblBotStatus.AutoSize = true;
-            this.lblBotStatus.ForeColor = System.Drawing.Color.Blue;
-            this.lblBotStatus.Location = new System.Drawing.Point(801, 46);
-            this.lblBotStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblBotStatus.Name = "lblBotStatus";
-            this.lblBotStatus.Size = new System.Drawing.Size(102, 25);
-            this.lblBotStatus.TabIndex = 19;
-            this.lblBotStatus.Text = "Loading ...";
-            // 
             // btnChangeBotStatus
             // 
-            this.btnChangeBotStatus.Location = new System.Drawing.Point(919, 43);
+            this.btnChangeBotStatus.Enabled = false;
+            this.btnChangeBotStatus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnChangeBotStatus.ForeColor = System.Drawing.Color.Blue;
+            this.btnChangeBotStatus.Location = new System.Drawing.Point(730, 20);
             this.btnChangeBotStatus.Margin = new System.Windows.Forms.Padding(4);
             this.btnChangeBotStatus.Name = "btnChangeBotStatus";
-            this.btnChangeBotStatus.Size = new System.Drawing.Size(96, 24);
+            this.btnChangeBotStatus.Size = new System.Drawing.Size(172, 42);
             this.btnChangeBotStatus.TabIndex = 21;
-            this.btnChangeBotStatus.Text = "Start Bot";
+            this.btnChangeBotStatus.Text = "BOT: Loading ...";
             this.btnChangeBotStatus.UseVisualStyleBackColor = true;
             this.btnChangeBotStatus.Click += new System.EventHandler(this.btnChangeBotStatus_Click);
             // 
@@ -607,7 +724,6 @@
             this.dgOrdersHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.baseAssetDataGridViewTextBoxColumn1,
             this.poolDataGridViewTextBoxColumn1,
-            this.groupDataGridViewTextBoxColumn1,
             this.Type,
             this.baseQtyDataGridViewTextBoxColumn1,
             this.dataGridViewTextBoxColumn1,
@@ -627,6 +743,124 @@
             this.dgOrdersHistory.RowTemplate.Height = 28;
             this.dgOrdersHistory.Size = new System.Drawing.Size(1223, 500);
             this.dgOrdersHistory.TabIndex = 0;
+            // 
+            // baseAssetDataGridViewTextBoxColumn1
+            // 
+            this.baseAssetDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.baseAssetDataGridViewTextBoxColumn1.DataPropertyName = "BaseAsset";
+            this.baseAssetDataGridViewTextBoxColumn1.Frozen = true;
+            this.baseAssetDataGridViewTextBoxColumn1.HeaderText = "Base Asset";
+            this.baseAssetDataGridViewTextBoxColumn1.Name = "baseAssetDataGridViewTextBoxColumn1";
+            this.baseAssetDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.baseAssetDataGridViewTextBoxColumn1.Width = 148;
+            // 
+            // poolDataGridViewTextBoxColumn1
+            // 
+            this.poolDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.poolDataGridViewTextBoxColumn1.DataPropertyName = "Pool";
+            this.poolDataGridViewTextBoxColumn1.Frozen = true;
+            this.poolDataGridViewTextBoxColumn1.HeaderText = "Pool";
+            this.poolDataGridViewTextBoxColumn1.Name = "poolDataGridViewTextBoxColumn1";
+            this.poolDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.poolDataGridViewTextBoxColumn1.Width = 87;
+            // 
+            // Type
+            // 
+            this.Type.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.Type.DataPropertyName = "Type";
+            this.Type.Frozen = true;
+            this.Type.HeaderText = "Type";
+            this.Type.MinimumWidth = 50;
+            this.Type.Name = "Type";
+            this.Type.ReadOnly = true;
+            this.Type.Width = 93;
+            // 
+            // baseQtyDataGridViewTextBoxColumn1
+            // 
+            this.baseQtyDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.baseQtyDataGridViewTextBoxColumn1.DataPropertyName = "BaseQty";
+            this.baseQtyDataGridViewTextBoxColumn1.HeaderText = "Base Qty";
+            this.baseQtyDataGridViewTextBoxColumn1.Name = "baseQtyDataGridViewTextBoxColumn1";
+            this.baseQtyDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.baseQtyDataGridViewTextBoxColumn1.Width = 129;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewTextBoxColumn1.DataPropertyName = "ExecutedBaseQty";
+            this.dataGridViewTextBoxColumn1.HeaderText = "Executed Base Qty";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            this.dataGridViewTextBoxColumn1.Width = 216;
+            // 
+            // quoteAssetDataGridViewTextBoxColumn1
+            // 
+            this.quoteAssetDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.quoteAssetDataGridViewTextBoxColumn1.DataPropertyName = "QuoteAsset";
+            this.quoteAssetDataGridViewTextBoxColumn1.HeaderText = "Quote Asset";
+            this.quoteAssetDataGridViewTextBoxColumn1.Name = "quoteAssetDataGridViewTextBoxColumn1";
+            this.quoteAssetDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.quoteAssetDataGridViewTextBoxColumn1.Width = 157;
+            // 
+            // expectedQuoteQtyDataGridViewTextBoxColumn1
+            // 
+            this.expectedQuoteQtyDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.expectedQuoteQtyDataGridViewTextBoxColumn1.DataPropertyName = "ExpectedQuoteQty";
+            this.expectedQuoteQtyDataGridViewTextBoxColumn1.HeaderText = "Expected Quote Qty";
+            this.expectedQuoteQtyDataGridViewTextBoxColumn1.Name = "expectedQuoteQtyDataGridViewTextBoxColumn1";
+            this.expectedQuoteQtyDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.expectedQuoteQtyDataGridViewTextBoxColumn1.Width = 225;
+            // 
+            // receivedQuoteQtyDataGridViewTextBoxColumn1
+            // 
+            this.receivedQuoteQtyDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.receivedQuoteQtyDataGridViewTextBoxColumn1.DataPropertyName = "ReceivedQuoteQty";
+            this.receivedQuoteQtyDataGridViewTextBoxColumn1.HeaderText = "Received Quote Qty";
+            this.receivedQuoteQtyDataGridViewTextBoxColumn1.Name = "receivedQuoteQtyDataGridViewTextBoxColumn1";
+            this.receivedQuoteQtyDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.receivedQuoteQtyDataGridViewTextBoxColumn1.Width = 224;
+            // 
+            // statusDataGridViewTextBoxColumn1
+            // 
+            this.statusDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.statusDataGridViewTextBoxColumn1.DataPropertyName = "Status";
+            this.statusDataGridViewTextBoxColumn1.HeaderText = "Status";
+            this.statusDataGridViewTextBoxColumn1.Name = "statusDataGridViewTextBoxColumn1";
+            this.statusDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.statusDataGridViewTextBoxColumn1.Width = 104;
+            // 
+            // statusMsgDataGridViewTextBoxColumn1
+            // 
+            this.statusMsgDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.statusMsgDataGridViewTextBoxColumn1.DataPropertyName = "StatusMsg";
+            this.statusMsgDataGridViewTextBoxColumn1.HeaderText = "Reason if cancelled by bot";
+            this.statusMsgDataGridViewTextBoxColumn1.Name = "statusMsgDataGridViewTextBoxColumn1";
+            this.statusMsgDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.statusMsgDataGridViewTextBoxColumn1.Width = 275;
+            // 
+            // createdDataGridViewTextBoxColumn1
+            // 
+            this.createdDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.createdDataGridViewTextBoxColumn1.DataPropertyName = "Created";
+            this.createdDataGridViewTextBoxColumn1.HeaderText = "Created";
+            this.createdDataGridViewTextBoxColumn1.Name = "createdDataGridViewTextBoxColumn1";
+            this.createdDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.createdDataGridViewTextBoxColumn1.Visible = false;
+            this.createdDataGridViewTextBoxColumn1.Width = 102;
+            // 
+            // lastModifiedDataGridViewTextBoxColumn1
+            // 
+            this.lastModifiedDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.lastModifiedDataGridViewTextBoxColumn1.DataPropertyName = "LastModified";
+            this.lastModifiedDataGridViewTextBoxColumn1.HeaderText = "LastModified";
+            this.lastModifiedDataGridViewTextBoxColumn1.Name = "lastModifiedDataGridViewTextBoxColumn1";
+            this.lastModifiedDataGridViewTextBoxColumn1.ReadOnly = true;
+            this.lastModifiedDataGridViewTextBoxColumn1.Visible = false;
+            this.lastModifiedDataGridViewTextBoxColumn1.Width = 136;
+            // 
+            // ordersHistoryBindingSource
+            // 
+            this.ordersHistoryBindingSource.DataSource = typeof(CryptoSwapMaster.Data.Entities.Order);
             // 
             // pnlFilters
             // 
@@ -861,312 +1095,6 @@
             this.pnlTabControl.Size = new System.Drawing.Size(1233, 608);
             this.pnlTabControl.TabIndex = 7;
             // 
-            // openOrdersBindingSource
-            // 
-            this.openOrdersBindingSource.DataSource = typeof(CryptoSwapMaster.Data.Entities.Order);
-            // 
-            // ordersHistoryBindingSource
-            // 
-            this.ordersHistoryBindingSource.DataSource = typeof(CryptoSwapMaster.Data.Entities.Order);
-            // 
-            // baseAssetDataGridViewTextBoxColumn1
-            // 
-            this.baseAssetDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.baseAssetDataGridViewTextBoxColumn1.DataPropertyName = "BaseAsset";
-            this.baseAssetDataGridViewTextBoxColumn1.Frozen = true;
-            this.baseAssetDataGridViewTextBoxColumn1.HeaderText = "Base Asset";
-            this.baseAssetDataGridViewTextBoxColumn1.Name = "baseAssetDataGridViewTextBoxColumn1";
-            this.baseAssetDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.baseAssetDataGridViewTextBoxColumn1.Width = 148;
-            // 
-            // poolDataGridViewTextBoxColumn1
-            // 
-            this.poolDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.poolDataGridViewTextBoxColumn1.DataPropertyName = "Pool";
-            this.poolDataGridViewTextBoxColumn1.Frozen = true;
-            this.poolDataGridViewTextBoxColumn1.HeaderText = "Pool";
-            this.poolDataGridViewTextBoxColumn1.Name = "poolDataGridViewTextBoxColumn1";
-            this.poolDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.poolDataGridViewTextBoxColumn1.Width = 87;
-            // 
-            // groupDataGridViewTextBoxColumn1
-            // 
-            this.groupDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.groupDataGridViewTextBoxColumn1.DataPropertyName = "Group";
-            this.groupDataGridViewTextBoxColumn1.Frozen = true;
-            this.groupDataGridViewTextBoxColumn1.HeaderText = "Group";
-            this.groupDataGridViewTextBoxColumn1.Name = "groupDataGridViewTextBoxColumn1";
-            this.groupDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.groupDataGridViewTextBoxColumn1.Width = 102;
-            // 
-            // Type
-            // 
-            this.Type.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.Type.DataPropertyName = "Type";
-            this.Type.Frozen = true;
-            this.Type.HeaderText = "Type";
-            this.Type.MinimumWidth = 50;
-            this.Type.Name = "Type";
-            this.Type.ReadOnly = true;
-            this.Type.Width = 93;
-            // 
-            // baseQtyDataGridViewTextBoxColumn1
-            // 
-            this.baseQtyDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.baseQtyDataGridViewTextBoxColumn1.DataPropertyName = "BaseQty";
-            this.baseQtyDataGridViewTextBoxColumn1.HeaderText = "Base Qty";
-            this.baseQtyDataGridViewTextBoxColumn1.Name = "baseQtyDataGridViewTextBoxColumn1";
-            this.baseQtyDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.baseQtyDataGridViewTextBoxColumn1.Width = 129;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "ExecutedBaseQty";
-            this.dataGridViewTextBoxColumn1.HeaderText = "Executed Base Qty";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 216;
-            // 
-            // quoteAssetDataGridViewTextBoxColumn1
-            // 
-            this.quoteAssetDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.quoteAssetDataGridViewTextBoxColumn1.DataPropertyName = "QuoteAsset";
-            this.quoteAssetDataGridViewTextBoxColumn1.HeaderText = "Quote Asset";
-            this.quoteAssetDataGridViewTextBoxColumn1.Name = "quoteAssetDataGridViewTextBoxColumn1";
-            this.quoteAssetDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.quoteAssetDataGridViewTextBoxColumn1.Width = 157;
-            // 
-            // expectedQuoteQtyDataGridViewTextBoxColumn1
-            // 
-            this.expectedQuoteQtyDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.expectedQuoteQtyDataGridViewTextBoxColumn1.DataPropertyName = "ExpectedQuoteQty";
-            this.expectedQuoteQtyDataGridViewTextBoxColumn1.HeaderText = "Expected Quote Qty";
-            this.expectedQuoteQtyDataGridViewTextBoxColumn1.Name = "expectedQuoteQtyDataGridViewTextBoxColumn1";
-            this.expectedQuoteQtyDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.expectedQuoteQtyDataGridViewTextBoxColumn1.Width = 225;
-            // 
-            // receivedQuoteQtyDataGridViewTextBoxColumn1
-            // 
-            this.receivedQuoteQtyDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.receivedQuoteQtyDataGridViewTextBoxColumn1.DataPropertyName = "ReceivedQuoteQty";
-            this.receivedQuoteQtyDataGridViewTextBoxColumn1.HeaderText = "Received Quote Qty";
-            this.receivedQuoteQtyDataGridViewTextBoxColumn1.Name = "receivedQuoteQtyDataGridViewTextBoxColumn1";
-            this.receivedQuoteQtyDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.receivedQuoteQtyDataGridViewTextBoxColumn1.Width = 224;
-            // 
-            // statusDataGridViewTextBoxColumn1
-            // 
-            this.statusDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.statusDataGridViewTextBoxColumn1.DataPropertyName = "Status";
-            this.statusDataGridViewTextBoxColumn1.HeaderText = "Status";
-            this.statusDataGridViewTextBoxColumn1.Name = "statusDataGridViewTextBoxColumn1";
-            this.statusDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.statusDataGridViewTextBoxColumn1.Width = 104;
-            // 
-            // statusMsgDataGridViewTextBoxColumn1
-            // 
-            this.statusMsgDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.statusMsgDataGridViewTextBoxColumn1.DataPropertyName = "StatusMsg";
-            this.statusMsgDataGridViewTextBoxColumn1.HeaderText = "Reason if cancelled by bot";
-            this.statusMsgDataGridViewTextBoxColumn1.Name = "statusMsgDataGridViewTextBoxColumn1";
-            this.statusMsgDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.statusMsgDataGridViewTextBoxColumn1.Width = 275;
-            // 
-            // createdDataGridViewTextBoxColumn1
-            // 
-            this.createdDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.createdDataGridViewTextBoxColumn1.DataPropertyName = "Created";
-            this.createdDataGridViewTextBoxColumn1.HeaderText = "Created";
-            this.createdDataGridViewTextBoxColumn1.Name = "createdDataGridViewTextBoxColumn1";
-            this.createdDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.createdDataGridViewTextBoxColumn1.Visible = false;
-            this.createdDataGridViewTextBoxColumn1.Width = 118;
-            // 
-            // lastModifiedDataGridViewTextBoxColumn1
-            // 
-            this.lastModifiedDataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.lastModifiedDataGridViewTextBoxColumn1.DataPropertyName = "LastModified";
-            this.lastModifiedDataGridViewTextBoxColumn1.HeaderText = "LastModified";
-            this.lastModifiedDataGridViewTextBoxColumn1.Name = "lastModifiedDataGridViewTextBoxColumn1";
-            this.lastModifiedDataGridViewTextBoxColumn1.ReadOnly = true;
-            this.lastModifiedDataGridViewTextBoxColumn1.Visible = false;
-            this.lastModifiedDataGridViewTextBoxColumn1.Width = 159;
-            // 
-            // lblType
-            // 
-            this.lblType.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblType.AutoSize = true;
-            this.lblType.Location = new System.Drawing.Point(246, 1);
-            this.lblType.Name = "lblType";
-            this.lblType.Size = new System.Drawing.Size(57, 25);
-            this.lblType.TabIndex = 8;
-            this.lblType.Text = "Type";
-            this.lblType.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // cbType
-            // 
-            this.cbType.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.cbType.BackColor = System.Drawing.Color.White;
-            this.cbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbType.FormattingEnabled = true;
-            this.cbType.Items.AddRange(new object[] {
-            "Limit",
-            "Stop Loss"});
-            this.cbType.Location = new System.Drawing.Point(246, 30);
-            this.cbType.Name = "cbType";
-            this.cbType.Size = new System.Drawing.Size(144, 33);
-            this.cbType.TabIndex = 9;
-            this.cbType.SelectedIndexChanged += new System.EventHandler(this.cbType_SelectedIndexChanged);
-            // 
-            // idDataGridViewTextBoxColumn
-            // 
-            this.idDataGridViewTextBoxColumn.DataPropertyName = "Id";
-            this.idDataGridViewTextBoxColumn.HeaderText = "Id";
-            this.idDataGridViewTextBoxColumn.Name = "idDataGridViewTextBoxColumn";
-            this.idDataGridViewTextBoxColumn.ReadOnly = true;
-            this.idDataGridViewTextBoxColumn.Visible = false;
-            // 
-            // userIdDataGridViewTextBoxColumn
-            // 
-            this.userIdDataGridViewTextBoxColumn.DataPropertyName = "UserId";
-            this.userIdDataGridViewTextBoxColumn.HeaderText = "UserId";
-            this.userIdDataGridViewTextBoxColumn.Name = "userIdDataGridViewTextBoxColumn";
-            this.userIdDataGridViewTextBoxColumn.ReadOnly = true;
-            this.userIdDataGridViewTextBoxColumn.Visible = false;
-            // 
-            // poolDataGridViewTextBoxColumn
-            // 
-            this.poolDataGridViewTextBoxColumn.DataPropertyName = "Pool";
-            this.poolDataGridViewTextBoxColumn.HeaderText = "Pool";
-            this.poolDataGridViewTextBoxColumn.MinimumWidth = 122;
-            this.poolDataGridViewTextBoxColumn.Name = "poolDataGridViewTextBoxColumn";
-            this.poolDataGridViewTextBoxColumn.ReadOnly = true;
-            this.poolDataGridViewTextBoxColumn.Width = 122;
-            // 
-            // groupDataGridViewTextBoxColumn
-            // 
-            this.groupDataGridViewTextBoxColumn.DataPropertyName = "Group";
-            this.groupDataGridViewTextBoxColumn.HeaderText = "Group";
-            this.groupDataGridViewTextBoxColumn.MinimumWidth = 121;
-            this.groupDataGridViewTextBoxColumn.Name = "groupDataGridViewTextBoxColumn";
-            this.groupDataGridViewTextBoxColumn.ReadOnly = true;
-            this.groupDataGridViewTextBoxColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.groupDataGridViewTextBoxColumn.Width = 121;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.DataPropertyName = "Type";
-            this.dataGridViewTextBoxColumn2.HeaderText = "Type";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 151;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.dataGridViewTextBoxColumn2.Width = 151;
-            // 
-            // baseAssetDataGridViewTextBoxColumn
-            // 
-            this.baseAssetDataGridViewTextBoxColumn.DataPropertyName = "BaseAsset";
-            this.baseAssetDataGridViewTextBoxColumn.HeaderText = "BaseAsset";
-            this.baseAssetDataGridViewTextBoxColumn.Name = "baseAssetDataGridViewTextBoxColumn";
-            this.baseAssetDataGridViewTextBoxColumn.ReadOnly = true;
-            this.baseAssetDataGridViewTextBoxColumn.Visible = false;
-            // 
-            // baseQtyDataGridViewTextBoxColumn
-            // 
-            this.baseQtyDataGridViewTextBoxColumn.DataPropertyName = "BaseQty";
-            this.baseQtyDataGridViewTextBoxColumn.HeaderText = "Base Qty";
-            this.baseQtyDataGridViewTextBoxColumn.MinimumWidth = 181;
-            this.baseQtyDataGridViewTextBoxColumn.Name = "baseQtyDataGridViewTextBoxColumn";
-            this.baseQtyDataGridViewTextBoxColumn.ReadOnly = true;
-            this.baseQtyDataGridViewTextBoxColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.baseQtyDataGridViewTextBoxColumn.Width = 181;
-            // 
-            // ExecutedBaseQty
-            // 
-            this.ExecutedBaseQty.DataPropertyName = "ExecutedBaseQty";
-            this.ExecutedBaseQty.HeaderText = "Executed Base Qty";
-            this.ExecutedBaseQty.Name = "ExecutedBaseQty";
-            this.ExecutedBaseQty.ReadOnly = true;
-            this.ExecutedBaseQty.Visible = false;
-            // 
-            // quoteAssetDataGridViewTextBoxColumn
-            // 
-            this.quoteAssetDataGridViewTextBoxColumn.DataPropertyName = "QuoteAsset";
-            this.quoteAssetDataGridViewTextBoxColumn.HeaderText = "Quote Asset";
-            this.quoteAssetDataGridViewTextBoxColumn.MinimumWidth = 151;
-            this.quoteAssetDataGridViewTextBoxColumn.Name = "quoteAssetDataGridViewTextBoxColumn";
-            this.quoteAssetDataGridViewTextBoxColumn.ReadOnly = true;
-            this.quoteAssetDataGridViewTextBoxColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.quoteAssetDataGridViewTextBoxColumn.Width = 151;
-            // 
-            // expectedQuoteQtyDataGridViewTextBoxColumn
-            // 
-            this.expectedQuoteQtyDataGridViewTextBoxColumn.DataPropertyName = "ExpectedQuoteQty";
-            this.expectedQuoteQtyDataGridViewTextBoxColumn.HeaderText = "Quote Qty";
-            this.expectedQuoteQtyDataGridViewTextBoxColumn.MinimumWidth = 181;
-            this.expectedQuoteQtyDataGridViewTextBoxColumn.Name = "expectedQuoteQtyDataGridViewTextBoxColumn";
-            this.expectedQuoteQtyDataGridViewTextBoxColumn.ReadOnly = true;
-            this.expectedQuoteQtyDataGridViewTextBoxColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.expectedQuoteQtyDataGridViewTextBoxColumn.Width = 181;
-            // 
-            // receivedQuoteQtyDataGridViewTextBoxColumn
-            // 
-            this.receivedQuoteQtyDataGridViewTextBoxColumn.DataPropertyName = "ReceivedQuoteQty";
-            this.receivedQuoteQtyDataGridViewTextBoxColumn.HeaderText = "ReceivedQuoteQty";
-            this.receivedQuoteQtyDataGridViewTextBoxColumn.Name = "receivedQuoteQtyDataGridViewTextBoxColumn";
-            this.receivedQuoteQtyDataGridViewTextBoxColumn.ReadOnly = true;
-            this.receivedQuoteQtyDataGridViewTextBoxColumn.Visible = false;
-            // 
-            // statusDataGridViewTextBoxColumn
-            // 
-            this.statusDataGridViewTextBoxColumn.DataPropertyName = "Status";
-            this.statusDataGridViewTextBoxColumn.HeaderText = "Status";
-            this.statusDataGridViewTextBoxColumn.Name = "statusDataGridViewTextBoxColumn";
-            this.statusDataGridViewTextBoxColumn.ReadOnly = true;
-            this.statusDataGridViewTextBoxColumn.Visible = false;
-            // 
-            // statusMsgDataGridViewTextBoxColumn
-            // 
-            this.statusMsgDataGridViewTextBoxColumn.DataPropertyName = "StatusMsg";
-            this.statusMsgDataGridViewTextBoxColumn.HeaderText = "StatusMsg";
-            this.statusMsgDataGridViewTextBoxColumn.Name = "statusMsgDataGridViewTextBoxColumn";
-            this.statusMsgDataGridViewTextBoxColumn.ReadOnly = true;
-            this.statusMsgDataGridViewTextBoxColumn.Visible = false;
-            // 
-            // createdDataGridViewTextBoxColumn
-            // 
-            this.createdDataGridViewTextBoxColumn.DataPropertyName = "Created";
-            this.createdDataGridViewTextBoxColumn.HeaderText = "Created";
-            this.createdDataGridViewTextBoxColumn.Name = "createdDataGridViewTextBoxColumn";
-            this.createdDataGridViewTextBoxColumn.ReadOnly = true;
-            this.createdDataGridViewTextBoxColumn.Visible = false;
-            // 
-            // lastModifiedDataGridViewTextBoxColumn
-            // 
-            this.lastModifiedDataGridViewTextBoxColumn.DataPropertyName = "LastModified";
-            this.lastModifiedDataGridViewTextBoxColumn.HeaderText = "LastModified";
-            this.lastModifiedDataGridViewTextBoxColumn.Name = "lastModifiedDataGridViewTextBoxColumn";
-            this.lastModifiedDataGridViewTextBoxColumn.ReadOnly = true;
-            this.lastModifiedDataGridViewTextBoxColumn.Visible = false;
-            // 
-            // Action
-            // 
-            this.Action.DataPropertyName = "Id";
-            dataGridViewCellStyle6.BackColor = System.Drawing.Color.Transparent;
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.Transparent;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-            this.Action.DefaultCellStyle = dataGridViewCellStyle6;
-            this.Action.HeaderText = "Action";
-            this.Action.MinimumWidth = 108;
-            this.Action.Name = "Action";
-            this.Action.ReadOnly = true;
-            this.Action.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.Action.Text = "Remove";
-            this.Action.UseColumnTextForButtonValue = true;
-            this.Action.Width = 108;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -1192,6 +1120,7 @@
             this.pnlOrders.ResumeLayout(false);
             this.pnlOpenOrders.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgOpenOrders)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.openOrdersBindingSource)).EndInit();
             this.pnlNewOrder.ResumeLayout(false);
             this.pnlNewOrder.PerformLayout();
             this.tableOpenOrders.ResumeLayout(false);
@@ -1201,13 +1130,12 @@
             this.tpOrdersHistory.ResumeLayout(false);
             this.pnlOrdersHistory.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgOrdersHistory)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ordersHistoryBindingSource)).EndInit();
             this.pnlFilters.ResumeLayout(false);
             this.pnlFilters.PerformLayout();
             this.tpSettings.ResumeLayout(false);
             this.tpSettings.PerformLayout();
             this.pnlTabControl.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.openOrdersBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ordersHistoryBindingSource)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1239,10 +1167,8 @@
         private System.Windows.Forms.Label lblQuoteQty;
         private System.Windows.Forms.Label lblQuoteAsset;
         private System.Windows.Forms.Label lblBaseQty;
-        private System.Windows.Forms.Label lblGroup;
         private System.Windows.Forms.ComboBox cbPool;
         private System.Windows.Forms.TextBox tbQuoteQty;
-        private System.Windows.Forms.ComboBox cbGroup;
         private System.Windows.Forms.ComboBox cbQuoteAsset;
         private System.Windows.Forms.TextBox tbBaseQty;
         private System.Windows.Forms.Button btnAdd;
@@ -1264,8 +1190,6 @@
         private System.Windows.Forms.Panel pnlFilters;
         private System.Windows.Forms.Button btnRefreshOrdersHistory;
         private System.Windows.Forms.Button btnChangeBotStatus;
-        private System.Windows.Forms.Label lblBotStatus;
-        private System.Windows.Forms.Label lblBot;
         private System.Windows.Forms.ComboBox cbOrderStatus;
         private System.Windows.Forms.Label lblOrderStatus;
         private System.Windows.Forms.ComboBox cbBaseAsset2;
@@ -1288,7 +1212,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn idDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn userIdDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn poolDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn groupDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn baseAssetDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn baseQtyDataGridViewTextBoxColumn;

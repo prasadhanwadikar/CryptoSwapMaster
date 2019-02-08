@@ -23,9 +23,6 @@ namespace CryptoSwapMaster.Data.Entities
         public int Pool { get; set; }
 
         [Required]
-        public int Group { get; set; }
-
-        [Required]
         public string Type { get; set; }
 
         [Required]

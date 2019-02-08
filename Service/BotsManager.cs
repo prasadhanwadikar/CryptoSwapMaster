@@ -138,8 +138,7 @@ namespace CryptoSwapMaster.Service
 
                     foreach (var baseAssetOrdersGroup in baseAssetOrdersGroups)
                     {
-                        var assetPoolsSum = baseAssetOrdersGroup.GroupBy(x => x.Pool)
-                            .Sum(x => x.GroupBy(y => y.Group).Max(y => y.Sum(z => z.BaseQty)));
+                        var assetPoolsSum = baseAssetOrdersGroup.GroupBy(x => x.Pool).Sum(y => y.Max(z => z.BaseQty));
                         var assetFreeQty = accountInfo.Balances.First(x => x.Asset == baseAssetOrdersGroup.Key).Free;
                         if (assetFreeQty < assetPoolsSum)
                         {
@@ -147,59 +146,41 @@ namespace CryptoSwapMaster.Service
                             continue;
                         }
 
-                        var poolOrdersGroups = baseAssetOrdersGroup.GroupBy(x => x.Pool);
-                        Parallel.ForEach(poolOrdersGroups, (poolOrdersGroup) =>
+                        var pools = baseAssetOrdersGroup.GroupBy(x => x.Pool);
+                        Parallel.ForEach(pools, (pool) =>
                         {
-                            IGrouping<int, Order> selectedGroup = null;
-                            var groupOrdersGroups = poolOrdersGroup.GroupBy(x => x.Group);
-                            foreach (var groupOrdersGroup in groupOrdersGroups)
+                            foreach (var order in pool)
                             {
-                                var selectGroup = true;
-                                foreach (var order in groupOrdersGroup)
+                                var quote = b.Binance.GetQuote(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
+                                var isLimitOrder = order.Type == "Limit"; //false means StopLoss order
+                                if ((isLimitOrder && quote < order.ExpectedQuoteQty) || (!isLimitOrder && quote > order.ExpectedQuoteQty))
                                 {
-                                    var quote = b.Binance.GetQuote(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
-                                    var isLimitOrder = order.Type == "Limit"; //false means StopLoss order
-                                    if ((isLimitOrder && quote < order.ExpectedQuoteQty) || (!isLimitOrder && quote > order.ExpectedQuoteQty))
-                                    {
-                                        selectGroup = false;
-                                        break;
-                                    }
+                                    continue;
                                 }
-                                if (selectGroup)
-                                {
-                                    selectedGroup = groupOrdersGroup;
-                                    break;
-                                }
-                            }
 
-                            if (selectedGroup != null)
-                            {
                                 var exchangeOrders = new List<ExchangeOrder>();
-
-                                foreach (var order in selectedGroup)
+                                var orderParts = b.Binance.BuildOrders(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
+                                var i = 1;
+                                foreach (var orderPart in orderParts)
                                 {
-                                    var orderParts = b.Binance.BuildOrders(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
-                                    var i = 1;
-                                    foreach (var orderPart in orderParts)
+                                    var exchangeOrder = new ExchangeOrder
                                     {
-                                        var exchangeOrder = new ExchangeOrder
-                                        {
-                                            OrderId = order.Id,
-                                            Sequence = i,
-                                            Symbol = orderPart.Symbol,
-                                            Side = orderPart.Side.ToString(),
-                                            BaseQty = orderPart.OrigQty,
-                                            QuoteQty = orderPart.CummulativeQuoteQty,
-                                            Status = OrderStatus.Open,
-                                            Created = DateTime.Now
-                                        };
-                                        exchangeOrders.Add(exchangeOrder);
-                                        i++;
-                                    }
+                                        OrderId = order.Id,
+                                        Sequence = i,
+                                        Symbol = orderPart.Symbol,
+                                        Side = orderPart.Side.ToString(),
+                                        BaseQty = orderPart.OrigQty,
+                                        QuoteQty = orderPart.CummulativeQuoteQty,
+                                        Status = OrderStatus.Open,
+                                        Created = DateTime.Now
+                                    };
+                                    exchangeOrders.Add(exchangeOrder);
+                                    i++;
                                 }
 
                                 db.SaveExchangeOrders(exchangeOrders);
-                                db.MarkGroupOrdersInProcess(b.User.Id, selectedGroup.First().BaseAsset, selectedGroup.First().Pool, selectedGroup.First().Group);
+                                db.MarkPoolOrderInProcess(b.User.Id, order.BaseAsset, order.Pool, order.Id);
+                                break;
                             }
                         });
                     }

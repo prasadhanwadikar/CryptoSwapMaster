@@ -3,7 +3,6 @@
     [UserId]           INT             NOT NULL,
     [BaseAsset]        VARCHAR (10)   NOT NULL,
     [Pool]             INT             NOT NULL,
-    [Group]            INT             NOT NULL,	
     [Type]		VARCHAR(20)  NOT NULL,
     [BaseQty]          DECIMAL (18, 8) NOT NULL,
     [ExecutedBaseQty]	DECIMAL (18, 8) NULL,
