@@ -393,8 +393,8 @@ namespace CryptoSwapMaster.WinUI
                     throw new Exception("Invalid Quote Qty");
                 }
 
-                var isLimitOrder = _type == "Limit";
-                if (!isLimitOrder) //Stop Loss order
+                var stopLossOrder = _type == "Stop Loss";
+                if (stopLossOrder)
                 {
                     var quote = _binance.GetQuote(_baseAsset, _quoteAsset, _baseQty, _accountInfo.TakerCommission);
                     if (_quoteQty >= quote)

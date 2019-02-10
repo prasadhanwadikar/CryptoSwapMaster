@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tcSections = new System.Windows.Forms.TabControl();
             this.tpDashboard = new System.Windows.Forms.TabPage();
             this.splitDashboard = new System.Windows.Forms.SplitContainer();
@@ -196,14 +196,14 @@
             this.dgBalance.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgBalance.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Raised;
             this.dgBalance.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgBalance.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgBalance.DefaultCellStyle = dataGridViewCellStyle5;
             this.dgBalance.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgBalance.GridColor = System.Drawing.Color.White;
             this.dgBalance.Location = new System.Drawing.Point(0, 0);
@@ -266,14 +266,14 @@
             this.lastModifiedDataGridViewTextBoxColumn,
             this.Action});
             this.dgOpenOrders.DataSource = this.openOrdersBindingSource;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.Transparent;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgOpenOrders.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.Color.Transparent;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgOpenOrders.DefaultCellStyle = dataGridViewCellStyle7;
             this.dgOpenOrders.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgOpenOrders.GridColor = System.Drawing.Color.White;
             this.dgOpenOrders.Location = new System.Drawing.Point(0, 0);
@@ -282,9 +282,9 @@
             this.dgOpenOrders.Name = "dgOpenOrders";
             this.dgOpenOrders.ReadOnly = true;
             this.dgOpenOrders.RowHeadersVisible = false;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.dgOpenOrders.RowsDefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.dgOpenOrders.RowsDefaultCellStyle = dataGridViewCellStyle8;
             this.dgOpenOrders.RowTemplate.Height = 28;
             this.dgOpenOrders.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dgOpenOrders.Size = new System.Drawing.Size(1214, 251);
@@ -415,11 +415,11 @@
             // Action
             // 
             this.Action.DataPropertyName = "Id";
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.Transparent;
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.Transparent;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-            this.Action.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.Transparent;
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.Transparent;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            this.Action.DefaultCellStyle = dataGridViewCellStyle6;
             this.Action.HeaderText = "Action";
             this.Action.MinimumWidth = 116;
             this.Action.Name = "Action";
@@ -452,7 +452,7 @@
             this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 180F));
             this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
             this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 180F));
-            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 116F));
+            this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 117F));
             this.tableOpenOrders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableOpenOrders.Controls.Add(this.cbPool, 0, 1);
             this.tableOpenOrders.Controls.Add(this.tbQuoteQty, 4, 1);
@@ -473,7 +473,7 @@
             this.tableOpenOrders.RowCount = 2;
             this.tableOpenOrders.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableOpenOrders.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
-            this.tableOpenOrders.Size = new System.Drawing.Size(903, 66);
+            this.tableOpenOrders.Size = new System.Drawing.Size(904, 66);
             this.tableOpenOrders.TabIndex = 6;
             // 
             // cbPool
@@ -482,7 +482,7 @@
             this.cbPool.BackColor = System.Drawing.Color.White;
             this.cbPool.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbPool.FormattingEnabled = true;
-            this.cbPool.Location = new System.Drawing.Point(4, 32);
+            this.cbPool.Location = new System.Drawing.Point(4, 30);
             this.cbPool.Name = "cbPool";
             this.cbPool.Size = new System.Drawing.Size(114, 33);
             this.cbPool.TabIndex = 2;
@@ -535,7 +535,7 @@
             this.btnAdd.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnAdd.Location = new System.Drawing.Point(789, 30);
             this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(110, 32);
+            this.btnAdd.Size = new System.Drawing.Size(111, 32);
             this.btnAdd.TabIndex = 7;
             this.btnAdd.Text = "Add";
             this.btnAdd.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -579,7 +579,7 @@
             this.cbQuoteAsset.BackColor = System.Drawing.Color.White;
             this.cbQuoteAsset.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbQuoteAsset.FormattingEnabled = true;
-            this.cbQuoteAsset.Location = new System.Drawing.Point(457, 32);
+            this.cbQuoteAsset.Location = new System.Drawing.Point(457, 30);
             this.cbQuoteAsset.Name = "cbQuoteAsset";
             this.cbQuoteAsset.Size = new System.Drawing.Size(144, 33);
             this.cbQuoteAsset.TabIndex = 5;
@@ -603,9 +603,9 @@
             this.cbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbType.FormattingEnabled = true;
             this.cbType.Items.AddRange(new object[] {
-            "Limit",
+            "Take Profit",
             "Stop Loss"});
-            this.cbType.Location = new System.Drawing.Point(125, 32);
+            this.cbType.Location = new System.Drawing.Point(125, 30);
             this.cbType.Name = "cbType";
             this.cbType.Size = new System.Drawing.Size(144, 33);
             this.cbType.TabIndex = 9;
