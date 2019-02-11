@@ -38,6 +38,8 @@ namespace CryptoSwapMaster.BinanceApiAdapter
         private long _accountInfoCacheDuration;
         private WebSocket _wsAccountInfo;
 
+        private string[] _stableAssets = { "USDT", "USDC", "USDS" };
+
         public ExchangeInfo ExchangeInfo
         {
             get
@@ -235,9 +237,13 @@ namespace CryptoSwapMaster.BinanceApiAdapter
         {
             decimal quoteQty;
             decimal baseQty;
-            var symbol = asset == "USDT" || asset == "BTC" ? "BTCUSDT" : asset + "BTC";
 
-            if (asset == "USDT")
+            var symbol = "";
+            if (asset == "BTC") symbol = "BTC" + _stableAssets.First();
+            else if (_stableAssets.Contains(asset)) symbol = "BTC" + asset;
+            else symbol = asset + "BTC";
+
+            if (_stableAssets.Contains(asset))
             {
                 baseQty = qty / GetPrice(symbol);
                 quoteQty = qty;
@@ -302,7 +308,33 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                 };
                 orders.Add(order);
             }
-            else if (baseAsset == "USDT")
+            else if (_stableAssets.Contains(baseAsset) && _stableAssets.Contains(quoteAsset))
+            {
+                //buy - look for asks
+                var symbol1 = "BTC" + baseAsset;
+                var symbolInfo1 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol1);
+                var order1 = new OrderInfo()
+                {
+                    Symbol = symbol1,
+                    Side = BinanceOrderSide.BUY,
+                    OrigQty = GetQtyPostSwap(symbolInfo1.Symbol, BinanceOrderSide.BUY.ToString(), baseQty, takerCommission),
+                    CummulativeQuoteQty = baseQty
+                };
+                orders.Add(order1);
+
+                //sell - look for bids
+                var symbol2 = "BTC" + quoteAsset;
+                var symbolInfo2 = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol2);
+                var order2 = new OrderInfo()
+                {
+                    Symbol = symbol2,
+                    Side = BinanceOrderSide.SELL,
+                    OrigQty = order1.OrigQty,
+                    CummulativeQuoteQty = GetQtyPostSwap(symbolInfo2.Symbol, BinanceOrderSide.SELL.ToString(), order1.OrigQty, takerCommission)
+                };
+                orders.Add(order2);
+            }
+            else if (_stableAssets.Contains(baseAsset))
             {
                 //buy - look for asks
                 var symbol1 = "BTC" + baseAsset;
@@ -328,7 +360,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                 };
                 orders.Add(order2);
             }
-            else if (quoteAsset == "USDT")
+            else if (_stableAssets.Contains(quoteAsset))
             {
                 //sell - look for bids
                 var symbol1 = baseAsset + "BTC";

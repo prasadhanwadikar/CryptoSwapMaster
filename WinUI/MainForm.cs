@@ -33,6 +33,7 @@ namespace CryptoSwapMaster.WinUI
         private AccountInfo _accountInfo;
         private List<Order> _openOrders;
 
+        private string[] _stableAssets = { "USDT", "USDC", "USDS" };
         private string _baseAsset = string.Empty;
         private decimal _baseAssetFreeBalance = 0M;
         private int _pool = 0;
@@ -365,8 +366,11 @@ namespace CryptoSwapMaster.WinUI
                 tbBaseQty.Text = "";
                 throw new Exception("Base Qty is too less for an order");
             }
-
-            var symbol = _baseAsset == "BTC" || _baseAsset == "USDT" ? "BTCUSDT" : _baseAsset + "BTC";
+            var symbol = "";
+            if (_baseAsset == "BTC") symbol = "BTC" + _stableAssets.First();
+            else if (_stableAssets.Contains(_baseAsset)) symbol = "BTC" + _baseAsset;
+            else symbol = _baseAsset + "BTC";
+            
             _baseQty = _binance.GetBestPossibleLotSize(symbol, _baseQty);
             tbBaseQty.Text = _baseQty.ToString();
 
@@ -459,11 +463,11 @@ namespace CryptoSwapMaster.WinUI
 
                 if (_user == null)
                 {
-                    _quoteAssets = new List<string>() { "BTC", "USDT" };
+                    _quoteAssets = new List<string>();
                     clbQuoteAssets.Items.Clear();
                     foreach (var asset in _allAssets)
                     {
-                        clbQuoteAssets.Items.Add(asset, _quoteAssets.Contains(asset));
+                        clbQuoteAssets.Items.Add(asset, false);
                     }
                     MessageBox.Show("Quotes on the Dashboard are shown for the selected assets on this tab", "Note", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
