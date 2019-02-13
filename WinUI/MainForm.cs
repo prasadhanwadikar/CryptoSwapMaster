@@ -238,7 +238,7 @@ namespace CryptoSwapMaster.WinUI
 
                 if (cbQuoteAsset.Items.Contains(_quoteAsset))
                     cbQuoteAsset.SelectedItem = _quoteAsset;
-                else
+                else if (cbQuoteAsset.Items.Count > 0)
                     cbQuoteAsset.SelectedIndex = 0;
             }
             catch (Exception ex)
