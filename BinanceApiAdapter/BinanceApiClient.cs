@@ -243,6 +243,9 @@ namespace CryptoSwapMaster.BinanceApiAdapter
             else if (_stableAssets.Contains(asset)) symbol = "BTC" + asset;
             else symbol = asset + "BTC";
 
+            var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
+            if (symbolInfo == null) return true;
+
             if (_stableAssets.Contains(asset))
             {
                 baseQty = qty / GetPrice(symbol);
@@ -253,8 +256,7 @@ namespace CryptoSwapMaster.BinanceApiAdapter
                 baseQty = qty;
                 quoteQty = qty * GetPrice(symbol);
             }
-
-            var symbolInfo = ExchangeInfo.Symbols.FirstOrDefault(x => x.Symbol == symbol);
+            
             var minNotionalFilter = symbolInfo.Filters.FirstOrDefault(x => x.FilterType == FilterType.MIN_NOTIONAL);
             if (minNotionalFilter != null)
             {
