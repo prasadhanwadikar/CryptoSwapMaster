@@ -261,7 +261,7 @@ namespace CryptoSwapMaster.Service
                                 if (binanceOrderInfo.Status == BinanceOrderStatus.FILLED)
                                 {
                                     exchangeOrder.BaseQty = binanceOrderInfo.ExecutedQty;
-                                    exchangeOrder.QuoteQty = binanceOrderInfo.CummulativeQuoteQty;
+                                    exchangeOrder.QuoteQty = binanceOrderInfo.ReceivedQuoteQty;
                                     exchangeOrder.Status = OrderStatus.Completed;
                                     exchangeOrder.StatusMsg = null;
                                 }

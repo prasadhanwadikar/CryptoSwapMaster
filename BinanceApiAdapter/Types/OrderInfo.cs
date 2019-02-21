@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CryptoSwapMaster.BinanceApiAdapter.Enums;
 using Newtonsoft.Json;
 
@@ -20,6 +21,11 @@ namespace CryptoSwapMaster.BinanceApiAdapter.Types
         public BinanceOrderType Type { get; set; }
         public BinanceOrderSide Side { get; set; }
         public List<OrderFill> Fills { get; set; }
+
+        public decimal ReceivedQuoteQty
+        {
+            get { return Fills.Sum(x => x.CommissionAsset == "BNB" ? x.Qty : x.Qty - x.Commission); }
+        }
 
         public OrderInfo()
         {
