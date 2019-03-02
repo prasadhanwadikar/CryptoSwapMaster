@@ -72,14 +72,19 @@ namespace CryptoSwapMaster.Service
                         {
                             var bot = new Bot
                             {
-                                User = user,
-                                CTS = new CancellationTokenSource(),
-                                Binance = new BinanceApiClient(user.ApiKey, user.SecretKey, 30000, 5000)
+                                UserId = user.Id,
+                                CTS = new CancellationTokenSource()
                             };
+
+                            //Remove Exchange property from Bot and let Observer and Processor create exchange object on the go
+                            var key = db.GetKey(user.Id);
+                            bot.Exchange = new BinanceApiClient(key.ApiKey, key.SecretKey, 30000, 5000);
+
                             bot.Observer = new Task((b) => ObserveOrders((Bot)b), bot, bot.CTS.Token, TaskCreationOptions.AttachedToParent | TaskCreationOptions.LongRunning | TaskCreationOptions.None);
                             bot.Processor = new Task((b) => ProcessOrders((Bot)b), bot, bot.CTS.Token, TaskCreationOptions.AttachedToParent | TaskCreationOptions.LongRunning | TaskCreationOptions.None);
                             bot.Observer.Start();
                             bot.Processor.Start();
+
                             bots.Add(user.Id, bot);
                         }
 
@@ -121,12 +126,12 @@ namespace CryptoSwapMaster.Service
             var db = new Repository();
             try
             {
-                Thread.CurrentThread.Name = "O" + b.User.Id;
+                Thread.CurrentThread.Name = "O" + b.UserId;
                 _logger.Info(Thread.CurrentThread.Name + " started");
 
                 while (!b.CTS.IsCancellationRequested)
                 {
-                    var baseAssetOrdersGroups = db.GetOrders(b.User.Id, OrderStatus.Open).GroupBy(x => x.BaseAsset);
+                    var baseAssetOrdersGroups = db.GetOrders(b.UserId, OrderStatus.Open).GroupBy(x => x.BaseAsset);
 
                     if (!baseAssetOrdersGroups.Any())
                     {
@@ -134,7 +139,7 @@ namespace CryptoSwapMaster.Service
                         continue;
                     }
 
-                    var accountInfo = b.Binance.AccountInfo;
+                    var accountInfo = b.Exchange.AccountInfo;
 
                     foreach (var baseAssetOrdersGroup in baseAssetOrdersGroups)
                     {
@@ -142,7 +147,7 @@ namespace CryptoSwapMaster.Service
                         var assetFreeQty = accountInfo.Balances.First(x => x.Asset == baseAssetOrdersGroup.Key).Free;
                         if (assetFreeQty < assetPoolsSum)
                         {
-                            db.CancelOpenOrders(b.User.Id, baseAssetOrdersGroup.Key);
+                            db.CancelOpenOrders(b.UserId, baseAssetOrdersGroup.Key);
                             continue;
                         }
 
@@ -151,7 +156,7 @@ namespace CryptoSwapMaster.Service
                         {
                             foreach (var order in pool)
                             {
-                                var quote = b.Binance.GetQuote(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
+                                var quote = b.Exchange.GetQuote(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
                                 var takeProfitOrder = order.Type == "Take Profit"; //false means Stop Loss order
                                 if ((takeProfitOrder && quote < order.ExpectedQuoteQty) || (!takeProfitOrder && quote > order.ExpectedQuoteQty))
                                 {
@@ -159,7 +164,7 @@ namespace CryptoSwapMaster.Service
                                 }
 
                                 var exchangeOrders = new List<ExchangeOrder>();
-                                var orderParts = b.Binance.BuildOrders(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
+                                var orderParts = b.Exchange.BuildOrders(order.BaseAsset, order.QuoteAsset, order.BaseQty, accountInfo.TakerCommission);
                                 var i = 1;
                                 foreach (var orderPart in orderParts)
                                 {
@@ -179,21 +184,21 @@ namespace CryptoSwapMaster.Service
                                 }
 
                                 db.SaveExchangeOrders(exchangeOrders);
-                                db.MarkPoolOrderInProcess(b.User.Id, order.BaseAsset, order.Pool, order.Id);
+                                db.MarkPoolOrderInProcess(b.UserId, order.BaseAsset, order.Pool, order.Id);
                                 break;
                             }
                         });
                     }
                 }
 
-                db.UpdateBotStatus(b.User.Id, BotStatus.Stopped);
+                db.UpdateBotStatus(b.UserId, BotStatus.Stopped);
             }
             catch (Exception ex)
             {
                 try
                 {
                     _logger.Error("Error: " + ex.Message, ex);
-                    db.UpdateBotStatus(b.User.Id, BotStatus.Stopped, "Stopped due to error");
+                    db.UpdateBotStatus(b.UserId, BotStatus.Stopped, "Stopped due to error");
                 }
                 catch (Exception ex2)
                 {
@@ -211,12 +216,12 @@ namespace CryptoSwapMaster.Service
             var db = new Repository();
             try
             {
-                Thread.CurrentThread.Name = "P" + b.User.Id;
+                Thread.CurrentThread.Name = "P" + b.UserId;
                 _logger.Info(Thread.CurrentThread.Name + " started");
 
                 while (!b.CTS.IsCancellationRequested)
                 {
-                    var orders = db.GetOrders(b.User.Id, OrderStatus.InProcess);
+                    var orders = db.GetOrders(b.UserId, OrderStatus.InProcess);
 
                     if (!orders.Any())
                     {
@@ -224,7 +229,7 @@ namespace CryptoSwapMaster.Service
                         continue;
                     }
 
-                    var accountInfo = b.Binance.AccountInfo;
+                    var accountInfo = b.Exchange.AccountInfo;
                     
                     Parallel.ForEach(orders, (order) =>
                     {
@@ -237,17 +242,17 @@ namespace CryptoSwapMaster.Service
                                 if (exchangeOrder.Status == OrderStatus.Open)
                                 {
                                     if (exchangeOrder.Side == "BUY")
-                                        exchangeOrder.BaseQty = b.Binance.GetQtyPostSwap(exchangeOrder.Symbol, exchangeOrder.Side, exchangeOrder.QuoteQty, accountInfo.TakerCommission);
+                                        exchangeOrder.BaseQty = b.Exchange.GetQtyPostSwap(exchangeOrder.Symbol, exchangeOrder.Side, exchangeOrder.QuoteQty, accountInfo.TakerCommission);
 
-                                    exchangeOrder.BaseQty = b.Binance.GetBestPossibleLotSize(exchangeOrder.Symbol, exchangeOrder.BaseQty);
-                                    binanceOrderInfo = b.Binance.NewMarketOrder(exchangeOrder.Symbol, exchangeOrder.Side, exchangeOrder.BaseQty);
+                                    exchangeOrder.BaseQty = b.Exchange.GetBestPossibleLotSize(exchangeOrder.Symbol, exchangeOrder.BaseQty);
+                                    binanceOrderInfo = b.Exchange.NewMarketOrder(exchangeOrder.Symbol, exchangeOrder.Side, exchangeOrder.BaseQty);
                                     exchangeOrder.ExchangeOrderId = binanceOrderInfo.ClientOrderId;
                                     exchangeOrder.Status = OrderStatus.InProcess;
                                     exchangeOrder.StatusMsg = null;
                                 }
                                 else
                                 {
-                                    binanceOrderInfo = b.Binance.QueryOrder(exchangeOrder.Symbol, exchangeOrder.ExchangeOrderId);
+                                    binanceOrderInfo = b.Exchange.QueryOrder(exchangeOrder.Symbol, exchangeOrder.ExchangeOrderId);
                                 }
                             }
                             catch (BinanceException bex)
@@ -261,7 +266,7 @@ namespace CryptoSwapMaster.Service
                                 if (binanceOrderInfo.Status == BinanceOrderStatus.FILLED)
                                 {
                                     exchangeOrder.BaseQty = binanceOrderInfo.ExecutedQty;
-                                    exchangeOrder.QuoteQty = binanceOrderInfo.ReceivedQuoteQty;
+                                    exchangeOrder.QuoteQty = binanceOrderInfo.CummulativeQuoteQty;
                                     exchangeOrder.Status = OrderStatus.Completed;
                                     exchangeOrder.StatusMsg = null;
                                 }
@@ -280,14 +285,14 @@ namespace CryptoSwapMaster.Service
                     });
                 }
 
-                db.UpdateBotStatus(b.User.Id, BotStatus.Stopped);
+                db.UpdateBotStatus(b.UserId, BotStatus.Stopped);
             }
             catch (Exception ex)
             {
                 try
                 {
                     _logger.Error("Error: " + ex.Message, ex);
-                    db.UpdateBotStatus(b.User.Id, BotStatus.Stopped, "Stopped due to error");
+                    db.UpdateBotStatus(b.UserId, BotStatus.Stopped, "Stopped due to error");
                 }
                 catch (Exception ex2)
                 {

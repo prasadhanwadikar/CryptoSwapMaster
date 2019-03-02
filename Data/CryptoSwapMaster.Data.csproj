@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context.cs" />
+    <Compile Include="Entities\Key.cs" />
     <Compile Include="Enums\BotStatus.cs" />
     <Compile Include="Entities\ExchangeOrder.cs" />
     <Compile Include="Entities\Order.cs" />

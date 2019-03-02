@@ -11,10 +11,10 @@ namespace CryptoSwapMaster.Service
 {
     public class Bot
     {
-        public User User { get; set; }
+        public int UserId { get; set; }
         public Task Observer { get; set; }
         public Task Processor { get; set; }
         public CancellationTokenSource CTS { get; set; }
-        public BinanceApiClient Binance { get; set; }
+        public BinanceApiClient Exchange { get; set; }
     }
 }

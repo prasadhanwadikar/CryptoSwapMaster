@@ -27,6 +27,8 @@ namespace CryptoSwapMaster.Data
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<Key> Keys { get; set; }
+
         public DbSet<QuoteAsset> QuoteAssets { get; set; }
 
         public DbSet<Order> Orders { get; set; }

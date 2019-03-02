@@ -20,6 +20,9 @@ namespace CryptoSwapMaster.Data.Entities
         public int UserId { get; set; }
 
         [Required]
+        public int ExchangeId { get; set; }
+
+        [Required]
         public int Pool { get; set; }
 
         [Required]

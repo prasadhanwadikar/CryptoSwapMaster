@@ -28,6 +28,7 @@ namespace CryptoSwapMaster.WinUI
         private BinanceApiClient _binance;
         
         private User _user;
+        private Key _key;
         private List<string> _allAssets;
         private List<string> _quoteAssets;
         private AccountInfo _accountInfo;
@@ -80,9 +81,10 @@ namespace CryptoSwapMaster.WinUI
                     return;
                 }
 
-                txtApiKey.Text = _user.ApiKey;
-                txtSecretKey.Text = _user.SecretKey;
-                _binance.Reset(_user.ApiKey, _user.SecretKey, 30000, 9000);
+                _key = _db.GetKey(_user.Id);
+                txtApiKey.Text = _key.ApiKey;
+                txtSecretKey.Text = _key.SecretKey;
+                _binance.Reset(_key.ApiKey, _key.SecretKey, 30000, 9000);
 
                 cbBaseAsset2.SelectedIndex = 0;
                 cbOrderStatus.SelectedIndex = 0;
@@ -498,8 +500,8 @@ namespace CryptoSwapMaster.WinUI
                     MessageBox.Show("Provide ApiKey and SecretKey to get started!", "Unknown IP", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
                 }
-                txtApiKey.Text = _user.ApiKey;
-                txtSecretKey.Text = _user.SecretKey;
+                txtApiKey.Text = _key.ApiKey;
+                txtSecretKey.Text = _key.SecretKey;
                 clbQuoteAssets.Items.Clear();
                 foreach (var asset in _allAssets)
                 {

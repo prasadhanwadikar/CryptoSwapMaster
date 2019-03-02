@@ -30,25 +30,40 @@ namespace CryptoSwapMaster.Data
             }
         }
 
-        public User SaveUser(string ip, string apiKey, string secretKey, List<string> quoteAssets)
+        public Key GetKey(int userId, int exchangeId = 1)
+        {
+            using (var context = new Context())
+            {
+                return context.Keys.FirstOrDefault(x => x.UserId == userId && x.ExchangeId == exchangeId);
+            }
+        }
+
+        public User SaveUser(string ip, string apiKey, string secretKey, List<string> quoteAssets, int exchangeId = 1)
         {
             using (var context = new Context())
             {
                 var user = context.Users.FirstOrDefault(x => x.Ip == ip);
                 if (user == null)
                 {
-                    user = context.Users.FirstOrDefault(x => x.ApiKey == apiKey && x.SecretKey == secretKey);
-                    if (user == null)
+                    var key = context.Keys.FirstOrDefault(x => x.ApiKey == apiKey && x.SecretKey == secretKey);
+                    if (key == null)
                     {
                         user = new User()
                         {
                             Ip = ip,
-                            ApiKey = apiKey,
-                            SecretKey = secretKey,
                             BotStatus = BotStatus.Stopped,
                             Created = DateTime.Now
                         };
                         context.Users.Add(user);
+                        key = new Key()
+                        {
+                            User = user,
+                            ExchangeId = exchangeId,
+                            ApiKey = apiKey,
+                            SecretKey = secretKey,
+                            Created = DateTime.Now
+                        };
+                        context.Keys.Add(key);
                     }
                     else
                     {
@@ -58,20 +73,22 @@ namespace CryptoSwapMaster.Data
                 }
                 else
                 {
-                    user.ApiKey = apiKey;
-                    user.SecretKey = secretKey;
-                    user.LastModified = DateTime.Now;
+                    var key = context.Keys.FirstOrDefault(x => x.UserId == user.Id && x.ExchangeId == exchangeId);
+                    key.ApiKey = apiKey;
+                    key.SecretKey = secretKey;
+                    key.LastModified = DateTime.Now;
                 }
 
                 context.SaveChanges();
 
-                var existingSelectedAssets = context.QuoteAssets.Where(x => x.UserId == user.Id);
+                var existingSelectedAssets = context.QuoteAssets.Where(x => x.UserId == user.Id && x.ExchangeId == exchangeId);
                 if (existingSelectedAssets.Any()) context.QuoteAssets.RemoveRange(existingSelectedAssets);
                 foreach (var asset in quoteAssets)
                 {
                     context.QuoteAssets.Add(new QuoteAsset()
                                                     {
                                                         UserId = user.Id,
+                                                        ExchangeId = exchangeId,
                                                         Asset = asset
                                                     });
                 }
@@ -118,7 +135,7 @@ namespace CryptoSwapMaster.Data
             }
         }
 
-        public void AddOrder(int userId, string baseAsset, int pool, int group, string type, decimal baseQty, string quoteAsset, decimal quoteQty)
+        public void AddOrder(int userId, string baseAsset, int pool, int group, string type, decimal baseQty, string quoteAsset, decimal quoteQty, int exchangeId = 1)
         {
             using (var context = new Context())
             {
@@ -132,6 +149,7 @@ namespace CryptoSwapMaster.Data
                 var order = new Order
                 {
                     UserId = userId,
+                    ExchangeId = exchangeId,
                     BaseAsset = baseAsset,
                     Pool = pool,
                     Type = type,
